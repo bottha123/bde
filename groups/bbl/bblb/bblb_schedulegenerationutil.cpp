@@ -30,6 +30,10 @@ static const int k_MIN_SERIAL_MONTH = (1*12 + 1) - 1;
 #define SERIAL2Y(S) (S)/12
 #define SERIAL2M(S) (S)%12 + 1
 
+void myFunction() {
+	cout << "hi git!" << endl;
+}
+
 static
 inline void computeSerialMonthAndDay(int               *serialMonth,
                                      int               *day,
