@@ -14,9 +14,8 @@ BSLS_IDENT("$Id: $")
 //
 //@DESCRIPTION: This component provides a single class, 'bdlb::PCG', that is
 // used to generate random numbers employing the PCG algorithm, a
-// high-performance, high-quality RNG.  The PCG uses a linear congruential
-// generator as the state-transition function. [HJB: makes this clearer i.e
-// linear vs congruenial]
+// high-performance, high-quality RNG.  The PCG technique employs the concepts
+// of permutation functions on tuples and a base linear congruential generator
 //
 //
 ///Usage
@@ -29,33 +28,15 @@ BSLS_IDENT("$Id: $")
 // /dev/urandom.  In this example, we attempt to use /dev/urandom to obtain a
 // seed for our PCG. If that fails, we use a backup seed.
 //
-// [HJB] add ... as per coding standard
-// add a simple walkthrough only 2 spaces in code example
-//         bdlb::PCG      theRNG;
-//         uint64_t       seed;
-//         int            rtn_val =
-//             readFile((unsigned char *)&seed, sizeof(seed), "/dev/urandom");
-//         if (rtn_val != sizeof(seed)) {
-//             seed = time(NULL) ^ (intptr_t)&bsl::printf;  //backup seed
-//         }
-//         int rounds = 5;  // see PCG code base for details of 'rounds'
-//         theRNG.seed(seed, (intptr_t)&rounds);
-//
-// [HJB: remove the following section]
-//        size_t numBytesToFill = (numGuids * 16);
-//        for (size_t i = 0; i < numBytesToFill; i += sizeof(bsl::uint32_t)) {
-//            bsl::uint32_t rnd_int = pcg.generate();
-//              memcpy(bytes + i,
-//                &rnd_int,
-//                sizeof(rnd_int));  // possible to unlock for this line
-//        }
-//
-//        bytes = result; while (bytes != end) {
-//             typedef unsigned char uc;
-//             bytes[6] = uc(0x40 | (bytes[6] & 0x0F));
-//             bytes[8] = uc(0x80 | (bytes[8] & 0x3F));
-//             bytes += 16;
-//        }
+//  bdlb::PCG      theRNG;
+//  uint64_t       seed;
+//  int            rtn_val =
+//    readFile((unsigned char *)&seed, sizeof(seed), "/dev/urandom");
+//  if (rtn_val != sizeof(seed)) {
+//        seed = time(NULL) ^ (intptr_t)&bsl::printf;  //backup seed
+//  }
+//  int rounds = 5;  // see PCG code base for details of 'rounds'
+//  theRNG.seed(seed, (intptr_t)&rounds);
 //
 
 #include <bsl_cstdint.h>
@@ -68,7 +49,16 @@ namespace bdlb {
                                  // =========
 class PCG {
     // This mechanism class implements a random number generator (RNG) based on
-    // the PCG algorithm.  For details of the algorithm, see
+    // the PCG algorithm.  The PCG stands for "permuted congruential
+    // generator." The state is 64 bits, and also uses a so-called stream
+    // selector, also 64 bits.  'initState' is the starting state for the RNG.
+    // Any 64-bit value may be passed. 'streamSelector' selects the output
+    // sequence for the RNG.  Any 64-bit value may be passed, although only the
+    // low 63 bits are significant.  There are 2^63 different RNGs available,
+    // and 'streamSelector' selects from among them.  Invoking different
+    // instances with the identical 'initState' and 'streamSelector' will
+    // result in the same sequence of random numbers from subsequent
+    // invocations of getRandom().  For details of the algorithm,see
     // http://www.pcg-random.org.
 
   private:
@@ -83,10 +73,10 @@ class PCG {
   public:
     // CREATORS
     PCG(bsl::uint64_t initState = 0, bsl::uint64_t streamSelector = 1);
-        // Create a 'PCG' object and seed it with the specified 'initState' and
-        // 'streamSelector.' For the description of the parameters, refer to
-        // the 'seed' method. Note that 'seed' is invoked in the body of this
-        // constructor.
+        // Create a 'PCG' object and seed it with the optionally specified
+        // 'initState' and 'streamSelector.'  If 'initState' is not specified,
+        // 0 is used as the initial state.  If 'streamSelector' is not
+        // specified, 1 is used as the initial state.
 
     PCG(const PCG& original);
         // Create a 'PCG' object having the same state as the specified
@@ -101,15 +91,8 @@ class PCG {
         // 'original' object.
 
     void seed(bsl::uint64_t initState, bsl::uint64_t streamSelector);
-        // Seed the RNG with the specified 'initState' and 'streamSelector'.
-        // 'initState' is the starting state for the RNG.  Any 64-bit value may
-        // be passed. 'streamSelector' selects the output sequence for the RNG.
-        // Any 64-bit value may be passed, although only the low 63 bits are
-        // significant.  There are 2^63 different RNGs available, and
-        // 'streamSelector' selects from among them.  Invoking different
-        // instances with the identical 'initState' and 'streamSelector' will
-        // result in the same sequence of random numbers from subsequent
-        // invocations of generate().
+        // Re-seed the RNG with the specified new 'initState' and
+        // 'streamSelector'.
 
     bsl::uint32_t generate();
         // Return the next random number in the sequence.

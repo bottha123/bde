@@ -199,8 +199,8 @@ struct GuidUtil {
         // specification, consisting of 122 randomly generated bits, two
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
 
-    static void generateFromPCG(unsigned char *result,
-                                bsl::size_t    numGuids = 1);
+    static void generateNonSecure(unsigned char *result,
+                                  bsl::size_t    numGuids = 1);
         // Generate a sequence of GUIDs meeting the RFC 4122 version 4
         // specification, and load the resulting GUIDs into the array referred
         // to by the specified 'result'.  Optionally specify 'numGuids',
@@ -209,8 +209,9 @@ struct GuidUtil {
         // version 4 GUID consists of 122 randomly generated bits, two
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
         // The behavior is undefined unless 'result' refers to a contiguous
-        // sequence of at least 'numGuids' Guid objects.  Use the PCG random
-        // engine to generate high quality random numbers for Guids.
+        // sequence of at least 'numGuids' Guid objects.  Uses the PCG random
+        // engine to generate high quality random numbers for Guids.  This
+        // function does not generate cryptographically secure Guids.
 
     static int guidFromString(Guid *result, bslstl::StringRef guidString);
         // Parse the specified 'guidString' (in {GUID String Format}) and load

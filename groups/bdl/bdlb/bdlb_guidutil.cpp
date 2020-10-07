@@ -197,7 +197,7 @@ void GuidUtil::generate(Guid *result, bsl::size_t numGuids)
     generate(reinterpret_cast<unsigned char *>(result), numGuids);
 }
 
-void GuidUtil::generateFromPCG(unsigned char *result, bsl::size_t numGuids)
+void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
 {
     unsigned char *bytes = result;
     unsigned char *end   = bytes + numGuids * Guid::k_GUID_NUM_BYTES;
