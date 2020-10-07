@@ -12,9 +12,9 @@ BSLS_IDENT("$Id: $")
 //
 //@SEE_ALSO: bdlb::Guid
 //
-//@DESCRIPTION: This component provides a struct, 'bdlb::GuidUtil', that
-// serves as a namespace for utility functions that create and work with
-// Globally Unique Identifiers (GUIDs).
+//@DESCRIPTION: This component provides a struct, 'bdlb::GuidUtil', that serves
+// as a namespace for utility functions that create and work with Globally
+// Unique Identifiers (GUIDs).
 //
 ///Grammar for GUIDs Used in 'GuidFromString'
 ///------------------------------------------
@@ -199,6 +199,19 @@ struct GuidUtil {
         // specification, consisting of 122 randomly generated bits, two
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
 
+    static void generateFromPCG(unsigned char *result,
+                                bsl::size_t    numGuids = 1);
+        // Generate a sequence of GUIDs meeting the RFC 4122 version 4
+        // specification, and load the resulting GUIDs into the array referred
+        // to by the specified 'result'.  Optionally specify 'numGuids',
+        // indicating the number of GUIDs to load into the 'result' array.  If
+        // 'numGuids' is not supplied, a default of 1 is used.  An RFC 4122
+        // version 4 GUID consists of 122 randomly generated bits, two
+        // 'variant' bits set to '10' and four 'version' bits set to '0100'.
+        // The behavior is undefined unless 'result' refers to a contiguous
+        // sequence of at least 'numGuids' Guid objects.  Use the PCG random
+        // engine to generate high quality random numbers for Guids.
+
     static int guidFromString(Guid *result, bslstl::StringRef guidString);
         // Parse the specified 'guidString' (in {GUID String Format}) and load
         // its value into the specified 'result'.  Return 0 if 'result'
@@ -233,10 +246,7 @@ struct GuidUtil {
 //                      INLINE DEFINITIONS
 // ============================================================================
 
-                              // ---------------
-                              // struct GuidUtil
-                              // ---------------
-// CLASS METHODS
+// --------------- struct GuidUtil --------------- CLASS METHODS
 inline
 int GuidUtil::getVersion(const Guid& guid)
 {

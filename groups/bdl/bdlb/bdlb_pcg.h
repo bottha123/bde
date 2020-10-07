@@ -15,7 +15,8 @@ BSLS_IDENT("$Id: $")
 //@DESCRIPTION: This component provides a single class, 'bdlb::PCG', that is
 // used to generate random numbers employing the PCG algorithm, a
 // high-performance, high-quality RNG.  The PCG uses a linear congruential
-// generator as the state-transition function.
+// generator as the state-transition function. [HJB: makes this clearer i.e
+// linear vs congruenial]
 //
 //
 ///Usage
@@ -28,6 +29,8 @@ BSLS_IDENT("$Id: $")
 // /dev/urandom.  In this example, we attempt to use /dev/urandom to obtain a
 // seed for our PCG. If that fails, we use a backup seed.
 //
+// [HJB] add ... as per coding standard
+// add a simple walkthrough only 2 spaces in code example
 //         bdlb::PCG      theRNG;
 //         uint64_t       seed;
 //         int            rtn_val =
@@ -38,10 +41,10 @@ BSLS_IDENT("$Id: $")
 //         int rounds = 5;  // see PCG code base for details of 'rounds'
 //         theRNG.seed(seed, (intptr_t)&rounds);
 //
-//
+// [HJB: remove the following section]
 //        size_t numBytesToFill = (numGuids * 16);
 //        for (size_t i = 0; i < numBytesToFill; i += sizeof(bsl::uint32_t)) {
-//            bsl::uint32_t rnd_int = pcg.getRandom();
+//            bsl::uint32_t rnd_int = pcg.generate();
 //              memcpy(bytes + i,
 //                &rnd_int,
 //                sizeof(rnd_int));  // possible to unlock for this line
@@ -70,10 +73,9 @@ class PCG {
 
   private:
     // DATA
-    bsl::uint64_t d_state;           // RNG state.  All values are possible.
+    bsl::uint64_t d_state;           // the RNG state
 
-    bsl::uint64_t d_streamSelector;  // Controls which RNG sequence (stream) is
-                                     // selected. Must *always* be odd.
+    bsl::uint64_t d_streamSelector;  // selected sequence
 
     // FRIENDS
     friend bool operator==(const PCG& lhs, const PCG& rhs);
@@ -107,9 +109,9 @@ class PCG {
         // 'streamSelector' selects from among them.  Invoking different
         // instances with the identical 'initState' and 'streamSelector' will
         // result in the same sequence of random numbers from subsequent
-        // invocations of getRandom().
+        // invocations of generate().
 
-    bsl::uint32_t getRandom();
+    bsl::uint32_t generate();
         // Return the next random number in the sequence.
 };
 
@@ -162,13 +164,13 @@ void PCG::seed(bsl::uint64_t initState, bsl::uint64_t streamSelector)
 {
     d_state          = 0U;
     d_streamSelector = (streamSelector << 1u) | 1u;
-    getRandom();
+    generate();
     d_state += initState;
-    getRandom();
+    generate();
 }
 
 inline
-bsl::uint32_t PCG::getRandom()
+bsl::uint32_t PCG::generate()
 {
     bsl::uint64_t oldstate = d_state;
     d_state = oldstate * 6364136223846793005ULL + d_streamSelector;

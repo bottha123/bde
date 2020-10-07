@@ -2,15 +2,20 @@
 #include <bdlb_guidutil.h>
 
 #include <bsls_ident.h>
-BSLS_IDENT_RCSID(RCSid_bdlb_guidutil_cpp,"$Id$ $CSID$")
+BSLS_IDENT_RCSID(RCSid_bdlb_guidutil_cpp, "$Id$ $CSID$")
 
 #include <bdlb_guid.h>
+#include <bdlb_pcg.h>
 #include <bdlb_randomdevice.h>
 
 #include <bslmf_assert.h>
+#include <bslmt_lockguard.h>
+#include <bslmt_mutex.h>
+#include <bslmt_once.h>
 #include <bsls_byteorder.h>
 #include <bsls_platform.h>
 
+#include <bsl_cstdio.h>
 #include <bsl_cstring.h>
 #include <bsl_iostream.h>
 #include <bsl_sstream.h>
@@ -20,34 +25,73 @@ namespace bdlb {
 
 namespace {
 
-                        // ---------------
-                        // struct GuidUtil
-                        // ---------------
+                              // ---------------
+                              // struct GuidUtil
+                              // ---------------
 
 // LOCAL METHODS
-int charToHex(unsigned char* hex, unsigned char c)
-    // Convert the character in the specified 'c' to it suitable hex
-    // equivalent if one exists, load the value into the specified 'hex'.
-    // Return 0 if the conversion was successful, and non-zero otherwise.
+int charToHex(unsigned char *hex, unsigned char c)
+    // Convert the character in the specified 'c' to it suitable hex equivalent
+    // if one exists, load the value into the specified 'hex'.  Return 0 if the
+    // conversion was successful, and non-zero otherwise.
 {
     switch (c) {
-      default: return -1;                                             // RETURN
-      case '0': *hex = 0; break;
-      case '1': *hex = 1; break;
-      case '2': *hex = 2; break;
-      case '3': *hex = 3; break;
-      case '4': *hex = 4; break;
-      case '5': *hex = 5; break;
-      case '6': *hex = 6; break;
-      case '7': *hex = 7; break;
-      case '8': *hex = 8; break;
-      case '9': *hex = 9; break;
-      case 'a': case 'A': *hex = 10; break;
-      case 'b': case 'B': *hex = 11; break;
-      case 'c': case 'C': *hex = 12; break;
-      case 'd': case 'D': *hex = 13; break;
-      case 'e': case 'E': *hex = 14; break;
-      case 'f': case 'F': *hex = 15; break;
+      default:
+        return -1;                                                    // RETURN
+      case '0':
+        *hex = 0;
+        break;
+      case '1':
+        *hex = 1;
+        break;
+      case '2':
+        *hex = 2;
+        break;
+      case '3':
+        *hex = 3;
+        break;
+      case '4':
+        *hex = 4;
+        break;
+      case '5':
+        *hex = 5;
+        break;
+      case '6':
+        *hex = 6;
+        break;
+      case '7':
+        *hex = 7;
+        break;
+      case '8':
+        *hex = 8;
+        break;
+      case '9':
+        *hex = 9;
+        break;
+      case 'a':
+      case 'A':
+        *hex = 10;
+        break;
+      case 'b':
+      case 'B':
+        *hex = 11;
+        break;
+      case 'c':
+      case 'C':
+        *hex = 12;
+        break;
+      case 'd':
+      case 'D':
+        *hex = 13;
+        break;
+      case 'e':
+      case 'E':
+        *hex = 14;
+        break;
+      case 'f':
+      case 'F':
+        *hex = 15;
+        break;
     }
     return 0;
 }
@@ -58,14 +102,14 @@ int vaildateGuidString(bslstl::StringRef guidString)
     // non-zero otherwise.
 {
     bsl::size_t length = guidString.length();
-    if (length < 32 || length > 40){
+    if (length < 32 || length > 40) {
         return -1;                                                    // RETURN
     }
 
-    const unsigned char *front_p = reinterpret_cast<const unsigned char *>(
-                                                      &guidString[0]);
+    const unsigned char *front_p =
+        reinterpret_cast<const unsigned char *>(&guidString[0]);
     const unsigned char *back_p = reinterpret_cast<const unsigned char *>(
-                                    &guidString[static_cast<int>(length) - 1]);
+        &guidString[static_cast<int>(length) - 1]);
 
     // check for braces
     if (('[' == *front_p && ']' == *back_p) ||
@@ -73,7 +117,7 @@ int vaildateGuidString(bslstl::StringRef guidString)
         // check for spaces
         front_p++;
         back_p--;
-        if (' ' == *front_p)  {
+        if (' ' == *front_p) {
             if (' ' != *back_p) {
                 return -1;                                            // RETURN
             }
@@ -84,8 +128,7 @@ int vaildateGuidString(bslstl::StringRef guidString)
 
     // check for '-'
     if ('-' == front_p[8] &&
-        ('-' != front_p[13] || '-' != front_p[18] || '-' != front_p[23]))
-    {
+        ('-' != front_p[13] || '-' != front_p[18] || '-' != front_p[23])) {
         return -1;                                                    // RETURN
     }
 
@@ -94,13 +137,30 @@ int vaildateGuidString(bslstl::StringRef guidString)
         switch (*front_p++) {
           default:
             return -1;                                                // RETURN
-          case '0': case '1': case '2': case '3': case '4':
-          case '5': case '6': case '7': case '8': case '9':
-          case 'A': case 'B': case 'C': case 'D': case 'E': case 'F':
-          case 'a': case 'b': case 'c': case 'd': case 'e': case 'f':
+          case '0':
+          case '1':
+          case '2':
+          case '3':
+          case '4':
+          case '5':
+          case '6':
+          case '7':
+          case '8':
+          case '9':
+          case 'A':
+          case 'B':
+          case 'C':
+          case 'D':
+          case 'E':
+          case 'F':
+          case 'a':
+          case 'b':
+          case 'c':
+          case 'd':
+          case 'e':
+          case 'f':
             ++digitCnt;
-          case '-':
-            ;
+          case '-':;
         }
     }
     if (32 != digitCnt) {
@@ -122,7 +182,7 @@ Guid GuidUtil::generate()
 void GuidUtil::generate(unsigned char *result, bsl::size_t numGuids)
 {
     unsigned char *bytes = result;
-    unsigned char *end = bytes + numGuids * Guid::k_GUID_NUM_BYTES;
+    unsigned char *end   = bytes + numGuids * Guid::k_GUID_NUM_BYTES;
     RandomDevice::getRandomBytesNonBlocking(bytes, end - bytes);
     while (bytes != end) {
         typedef unsigned char uc;
@@ -135,6 +195,39 @@ void GuidUtil::generate(unsigned char *result, bsl::size_t numGuids)
 void GuidUtil::generate(Guid *result, bsl::size_t numGuids)
 {
     generate(reinterpret_cast<unsigned char *>(result), numGuids);
+}
+
+void GuidUtil::generateFromPCG(unsigned char *result, bsl::size_t numGuids)
+{
+    unsigned char *bytes = result;
+    unsigned char *end   = bytes + numGuids * Guid::k_GUID_NUM_BYTES;
+
+    static bdlb::PCG pcgSingleton;
+    BSLMT_ONCE_DO
+    {
+        uint64_t seed;
+        if (0 != RandomDevice::getRandomBytes((unsigned char *)&seed,
+                                              sizeof(seed))) {
+            seed = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback seed
+        }
+        int rounds = 5;  // see PCG code base for details of 'rounds'
+        pcgSingleton.seed(seed, (intptr_t)&rounds);
+    }
+    {
+        static bslmt::Mutex            mutex;
+        bslmt::LockGuard<bslmt::Mutex> guard(&mutex);
+        size_t                         numBytesToFill = end - bytes;
+        for (size_t i = 0; i < numBytesToFill; i += sizeof(bsl::uint32_t)) {
+            bsl::uint32_t rnd_int = pcgSingleton.generate();
+            memcpy(bytes + i, &rnd_int, sizeof(rnd_int));
+        }
+    }
+    while (bytes != end) {
+        typedef unsigned char uc;
+        bytes[6] = uc(0x40 | (bytes[6] & 0x0F));
+        bytes[8] = uc(0x80 | (bytes[8] & 0x3F));
+        bytes += Guid::k_GUID_NUM_BYTES;
+    }
 }
 
 bsls::Types::Uint64 GuidUtil::getLeastSignificantBits(const Guid& guid)
@@ -163,24 +256,24 @@ int GuidUtil::guidFromString(Guid *result, bslstl::StringRef guidString)
 
     unsigned char        t_guid[Guid::k_GUID_NUM_BYTES];
     const unsigned char *curr_p =
-                   reinterpret_cast<const unsigned char *>(guidString.begin());
+        reinterpret_cast<const unsigned char *>(guidString.begin());
     const unsigned char *end =
-                   reinterpret_cast<const unsigned char *>(guidString.end());
-    bsl::size_t          i = 0;
+        reinterpret_cast<const unsigned char *>(guidString.end());
+    bsl::size_t i = 0;
     while (curr_p != end && i < Guid::k_GUID_NUM_BYTES) {
         unsigned char upper, lower;
-        if (0 == charToHex(&upper, *curr_p)
-        &&  0 == charToHex(&lower, *(curr_p + 1))) {
-            t_guid[i] = static_cast<unsigned char>((
-                                        (upper << 4) & 0Xf0) | (lower & 0x0f));
+        if (0 == charToHex(&upper, *curr_p) &&
+            0 == charToHex(&lower, *(curr_p + 1))) {
+            t_guid[i] = static_cast<unsigned char>(((upper << 4) & 0Xf0) |
+                                                   (lower & 0x0f));
             i++;
-            curr_p +=2;
+            curr_p += 2;
         }
         else {
             curr_p++;
         }
     }
-    *result =  Guid(t_guid);
+    *result = Guid(t_guid);
     return 0;
 }
 
