@@ -5,7 +5,7 @@
 BSLS_IDENT_RCSID(RCSid_bdlb_guidutil_cpp,"$Id$ $CSID$")
 
 #include <bdlb_guid.h>
-#include <bdlb_pcg.h>
+#include <bdlb_pcgrandomgenerator.h>
 #include <bdlb_randomdevice.h>
 
 #include <bslmf_assert.h>
@@ -142,13 +142,13 @@ void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
     unsigned char *bytes = result;
     unsigned char *end   = bytes + numGuids * Guid::k_GUID_NUM_BYTES;
 
-    static bdlb::PCG *pcgSingletonPtr;
+    static bdlb::PCGRandomGenerator *pcgSingletonPtr;
     BSLMT_ONCE_DO
     {
-        uint64_t seed;
-        if (0 != RandomDevice::getRandomBytes((unsigned char *)&seed,
-                                              sizeof(seed))) {
-            seed = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback seed
+        uint64_t state;
+        if (0 != RandomDevice::getRandomBytes((unsigned char *)&state,
+                                              sizeof(state))) {
+            state = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback state
         }
         uint64_t streamSelector;
         if (0 != RandomDevice::getRandomBytes((unsigned char *)&streamSelector,
@@ -156,7 +156,7 @@ void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
             streamSelector = time(NULL) ^
                    (intptr_t)&bsl::printf;  // fallback streamSelector
         }
-        static bdlb::PCG pcgSingleton(seed, streamSelector);
+        static bdlb::PCGRandomGenerator pcgSingleton(state, streamSelector);
         pcgSingletonPtr = &pcgSingleton;
     }
     {
