@@ -209,9 +209,9 @@ struct GuidUtil {
         // version 4 GUID consists of 122 randomly generated bits, two
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
         // The behavior is undefined unless 'result' refers to a contiguous
-        // sequence of at least 'numGuids' Guid objects.  Uses the PCG random
-        // engine to generate high quality random numbers for Guids.  This
-        // function does not generate cryptographically secure Guids.
+        // sequence of at least 'numGuids' Guid objects.  Note that this
+        // function uses the PCG random engine to generate high quality, albeit
+        // not cryptographically secure, random numbers for Guids.
 
     static int guidFromString(Guid *result, bslstl::StringRef guidString);
         // Parse the specified 'guidString' (in {GUID String Format}) and load
@@ -247,7 +247,10 @@ struct GuidUtil {
 //                      INLINE DEFINITIONS
 // ============================================================================
 
-// --------------- struct GuidUtil --------------- CLASS METHODS
+                              // ---------------
+                              // struct GuidUtil
+                              // ---------------
+// CLASS METHODS
 inline
 int GuidUtil::getVersion(const Guid& guid)
 {

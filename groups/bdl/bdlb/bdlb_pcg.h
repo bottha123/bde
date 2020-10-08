@@ -50,15 +50,15 @@ namespace bdlb {
 class PCG {
     // This mechanism class implements a random number generator (RNG) based on
     // the PCG algorithm.  The PCG stands for "permuted congruential
-    // generator." The state is 64 bits, and also uses a so-called stream
-    // selector, also 64 bits.  'initState' is the starting state for the RNG.
-    // Any 64-bit value may be passed. 'streamSelector' selects the output
-    // sequence for the RNG.  Any 64-bit value may be passed, although only the
-    // low 63 bits are significant.  There are 2^63 different RNGs available,
-    // and 'streamSelector' selects from among them.  Invoking different
-    // instances with the identical 'initState' and 'streamSelector' will
-    // result in the same sequence of random numbers from subsequent
-    // invocations of getRandom().  For details of the algorithm,see
+    // generator." The state is 64 bits. It uses a so-called stream selector,
+    // also 64 bits.  'initState' is the starting state for the RNG.  Any
+    // 64-bit value may be passed. 'streamSelector' selects the output sequence
+    // for the RNG.  Any 64-bit value may be passed, although only the low 63
+    // bits are significant.  There are 2^63 different RNGs available, and
+    // 'streamSelector' selects from among them.  Invoking different instances
+    // with the identical 'initState' and 'streamSelector' will result in the
+    // same sequence of random numbers from subsequent invocations of
+    // getRandom().  For details of the algorithm,see
     // http://www.pcg-random.org.
 
   private:
