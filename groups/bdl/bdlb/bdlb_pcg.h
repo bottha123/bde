@@ -78,13 +78,13 @@ class PCG {
         // 0 is used as the initial state.  If 'streamSelector' is not
         // specified, 1 is used as the initial state.
 
-    PCG(const PCG& original);
+    //! PCG(const PCG& original) = default;
         // Create a 'PCG' object having the same state as the specified
         // 'original' object. Note that this newly created object will generate
         // the same sequence of numbers as the 'original' object.
 
     // MANIPULATORS
-    PCG& operator=(const PCG& rhs);
+    //! PCG& operator=(const PCG& rhs) = default;
         // Assign to this object the value of the specified 'rhs' object, and
         // return a non-'const' reference to this object. Note that this newly
         // created object will generate the same sequence of numbers as the
@@ -126,22 +126,7 @@ PCG::PCG(bsl::uint64_t initState, bsl::uint64_t streamSelector)
     seed(initState, streamSelector);
 }
 
-inline
-PCG::PCG(const PCG& original)
-: d_state(original.d_state)
-, d_streamSelector(original.d_streamSelector)
-{
-}
-
 // MANIPULATORS
-inline
-PCG& PCG::operator=(const PCG& rhs)
-{
-    d_state          = rhs.d_state;
-    d_streamSelector = rhs.d_streamSelector;
-    return *this;
-}
-
 inline
 void PCG::seed(bsl::uint64_t initState, bsl::uint64_t streamSelector)
 {
