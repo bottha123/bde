@@ -26,7 +26,7 @@ BSLS_IDENT("$Id: $")
 ///Example 1: Generating random 32-bit numbers
 ///- - - - - - - - - - - - - - - - - - - - - -
 // The PCGRandomGenerator constructor takes two 64-bit constants (the initial
-// state, and the rng sequence selector.  Instances of PCGRandomGenerator with
+// state, and the rng sequence selector.  Instances of 'PCGRandomGenerator' with
 // different sequence selectors will never have random sequences that coincide.
 // In order to obtain nondeterministic output for each instance, on a Unix
 // system random bytes can be obtained from /dev/urandom.  The component 
