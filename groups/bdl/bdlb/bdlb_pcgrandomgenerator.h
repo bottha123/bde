@@ -47,7 +47,7 @@ BSLS_IDENT("$Id: $")
 //          // specified 'initialState' and 'streamSelector'.
 //
 //      // MANIPULATORS
-//      bsl::uint32_t roll();
+//      int roll();
 //          // Return the next pseudo-random value in the range '[1 .. 6]',
 //          // based on the sequence of values established by the initial seed
 //          // value supplied at construction.
@@ -65,9 +65,9 @@ BSLS_IDENT("$Id: $")
 //  }
 //
 //  // MANIPULATORS
-//  bsl::uint32_t Die::roll()
+//  int Die::roll()
 //  {
-//      bsl::uint32_t result;
+//      int result;
 //
 //      do {
 //          result = d_pcg.generate() & 7;
