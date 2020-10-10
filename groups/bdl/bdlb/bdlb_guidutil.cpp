@@ -137,6 +137,18 @@ void GuidUtil::generate(unsigned char *result, bsl::size_t numGuids)
     }
 }
 
+void GuidUtil::generate(Guid *result, bsl::size_t numGuids)
+{
+    generate(reinterpret_cast<unsigned char *>(result), numGuids);
+}
+
+Guid GuidUtil::generateNonSecure()
+{
+    Guid result;
+    generateNonSecure(&result);
+    return result;
+}
+
 void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
 {
     unsigned char *bytes = result;
@@ -176,9 +188,9 @@ void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
     }
 }
 
-void GuidUtil::generate(Guid *result, bsl::size_t numGuids)
+void GuidUtil::generateNonSecure(Guid *result, bsl::size_t numGuids)
 {
-    generate(reinterpret_cast<unsigned char *>(result), numGuids);
+    generateNonSecure(reinterpret_cast<unsigned char *>(result), numGuids);
 }
 
 bsls::Types::Uint64 GuidUtil::getLeastSignificantBits(const Guid& guid)

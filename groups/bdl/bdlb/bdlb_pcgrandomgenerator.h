@@ -156,14 +156,7 @@ class PcgRandomGenerator {
     // This class implements a random number generator (RNG) based on
     // the PCG algorithm.  PCG stands for "permuted congruential generator."
     // The state is 64 bits.  It uses a so-called stream selector, also 64
-    // bits.  'initState' is the starting state for the RNG.  Any
-    // 64-bit value may be passed.  'streamSelector' selects the output sequence
-    // for the RNG.  Any 64-bit value may be passed, although only the low 63
-    // bits are significant.  There are 2^63 different RNGs available, and
-    // 'streamSelector' selects from among them.  Invoking different instances
-    // with the identical 'initState' and 'streamSelector' will result in the
-    // same sequence of random numbers from subsequent invocations of
-    // generate().  For details of the algorithm,see
+    // bits. For details, please refer below to the constructor.  For details of the algorithm,see
     // http://www.pcg-random.org.
 
   private:
@@ -183,17 +176,34 @@ class PcgRandomGenerator {
         // Create a 'PcgRandomGenerator' object and seed it with the optionally
         // specified 'initState' and 'streamSelector.'  If 'initState' is not
         // specified, 0 is used as the initial state.  If 'streamSelector' is
-        // not specified, 1 is used as the stream selector.
+        // not specified, 1 is used as the stream selector. 'initState' is the
+        // starting state for the RNG.  Any 64-bit value may be passed.
+        // 'streamSelector' selects the output sequence for the RNG.  Any
+        // 64-bit value may be passed, although only the low 63 bits are
+        // significant.  There are 2^63 different RNGs available, and
+        // 'streamSelector' selects from among them.  Invoking different
+        // instances with the identical 'initState' and 'streamSelector' will
+        // result in the same sequence of random numbers from subsequent
+        // invocations of generate(). Why two values ('initState' and
+        // 'streamSelector') instead of a simple seed?  There is a potential
+        // hazard if multiple instances of a random number generator are used:
+        // an unintended correlation between their outputs.  For example, if we
+        // allow them to have the same internal state (e.g. mistakenly seeding
+        // both with the current time in seconds), they will output the exact
+        // same sequence of numbers.  Employing a stream selector enables the
+        // use of the same internal state.  Please refer to O’Neill (2014) at
+        // https://www.pcg-random.org/pdf/hmc-cs-2014-0905.pdf for further
+        // details of the algorithm.
 
     //! PcgRandomGenerator(const PcgRandomGenerator& original) = default;
         // Create a 'PcgRandomGenerator' object having the same state as the
-        // specified 'original' object. Note that this newly created object
+        // specified 'original' object.  Note that this newly created object
         // will generate the same sequence of numbers as the 'original' object.
 
     // MANIPULATORS
     //! PcgRandomGenerator& operator=(const PcgRandomGenerator& rhs) = default;
         // Assign to this object the value of the specified 'rhs' object, and
-        // return a non-'const' reference to this object. Note that this newly
+        // return a non-'const' reference to this object.  Note that this newly
         // created object will generate the same sequence of numbers as the
         // 'original' object.
 

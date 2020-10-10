@@ -103,50 +103,50 @@ bool veryVerbose         = false;
 bool veryVeryVerbose     = false;
 bool veryVeryVeryVerbose = false;
 
-//                     // =========
-//                     // class Die
-//                     // =========
+                    // =========
+                    // class Die
+                    // =========
 
-// class Die {
+class Die {
 
-//     // DATA
-//     bdlb::PcgRandomGenerator d_pcg; // used to generate next role of this die
+    // DATA
+    bdlb::PcgRandomGenerator d_pcg; // used to generate next role of this die
 
-//   public:
-//     // CREATORS
-//     Die(bsl::uint64_t initialState, bsl::uint64_t streamSelector);
-//         // Create an object used to simulate a single die, using the
-//         // specified 'initialState' and 'streamSelector'.
+  public:
+    // CREATORS
+    Die(bsl::uint64_t initialState, bsl::uint64_t streamSelector);
+        // Create an object used to simulate a single die, using the
+        // specified 'initialState' and 'streamSelector'.
 
-//     // MANIPULATORS
-//     int roll();
-//         // Return the next pseudo-random value in the range '[1 .. 6]',
-//         // based on the sequence of values established by the 'initialState'
-//         // and 'streamSelector' values supplied at construction.
-// };
+    // MANIPULATORS
+    int roll();
+        // Return the next pseudo-random value in the range '[1 .. 6]',
+        // based on the sequence of values established by the 'initialState'
+        // and 'streamSelector' values supplied at construction.
+};
 
-//                     // ---------
-//                     // class Die
-//                     // ---------
+                    // ---------
+                    // class Die
+                    // ---------
 
-// // CREATORS
-// inline
-// Die::Die(bsl::uint64_t initialState, bsl::uint64_t streamSelector)
-// : d_pcg(initialState, streamSelector)
-// {
-// }
+// CREATORS
+inline
+Die::Die(bsl::uint64_t initialState, bsl::uint64_t streamSelector)
+: d_pcg(initialState, streamSelector)
+{
+}
 
-// // MANIPULATORS
-// int Die::roll()
-// {
-//     int result;
+// MANIPULATORS
+int Die::roll()
+{
+    int result;
 
-//     do {
-//         result = d_pcg.generate() & 7;
-//     } while (result > 5);
+    do {
+        result = d_pcg.generate() & 7;
+    } while (result > 5);
 
-//     return result + 1;
-// }
+    return result + 1;
+}
 //..
 // Now, we can use our 'Dice' class to get the random numbers needed to
 // simulate a game of craps.  Note that the game of craps requires two dice.
