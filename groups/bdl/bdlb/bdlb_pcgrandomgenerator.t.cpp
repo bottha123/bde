@@ -103,9 +103,99 @@ bool veryVerbose         = false;
 bool veryVeryVerbose     = false;
 bool veryVeryVeryVerbose = false;
 
+//                     // =========
+//                     // class Die
+//                     // =========
+
+// class Die {
+
+//     // DATA
+//     bdlb::PcgRandomGenerator d_pcg; // used to generate next role of this die
+
+//   public:
+//     // CREATORS
+//     Die(bsl::uint64_t initialState, bsl::uint64_t streamSelector);
+//         // Create an object used to simulate a single die, using the
+//         // specified 'initialState' and 'streamSelector'.
+
+//     // MANIPULATORS
+//     int roll();
+//         // Return the next pseudo-random value in the range '[1 .. 6]',
+//         // based on the sequence of values established by the 'initialState'
+//         // and 'streamSelector' values supplied at construction.
+// };
+
+//                     // ---------
+//                     // class Die
+//                     // ---------
+
+// // CREATORS
+// inline
+// Die::Die(bsl::uint64_t initialState, bsl::uint64_t streamSelector)
+// : d_pcg(initialState, streamSelector)
+// {
+// }
+
+// // MANIPULATORS
+// int Die::roll()
+// {
+//     int result;
+
+//     do {
+//         result = d_pcg.generate() & 7;
+//     } while (result > 5);
+
+//     return result + 1;
+// }
+//..
+// Now, we can use our 'Dice' class to get the random numbers needed to
+// simulate a game of craps.  Note that the game of craps requires two dice.
+//
+// We can instantiate a single 'Die' and role it twice,
+//..
+    void rollOneDieTwice()
+    {
+        Die a(123, 456);
+
+        int d1 = a.roll();
+        int d2 = a.roll();
+
+        cout << "d1 = " << d1 << ", d2 = " << d2 << endl;  // d1 = 3, d2 = 5
+    }
+//..
+// Alternatively, we could create two instances of 'Die', with separate initial
+// states/sequences, and role each one once:
+//..
+    void rollTwoDice()
+    {
+        Die a(123, 123);
+        Die b(456, 456);
+
+        int d1 = a.roll();
+        int d2 = b.roll();
+
+        cout << "d1 = " << d1 << ", d2 = " << d2 << endl;  // d1 = 3, d2 = 1
+    }
+//..
+// Note that the specification of separate seeds is important to produce a
+// proper distribution for our game.  If we had shared the seed value each die
+// would always produce the same sequence of values as the other.
+//..
+    void shareStateAndSequence()
+    {
+        Die a(123, 456);  // BAD IDEA
+        Die b(123, 456);  // BAD IDEA
+
+        int d1 = a.roll();
+        int d2 = b.roll();
+        ASSERT(d2 == d1);
+    }
+//..
+
+
 void checkDifferentSeeds()
 {
-    bdlb::PCGRandomGenerator g1, g2;
+    bdlb::PcgRandomGenerator g1, g2;
     int                      ptr1   = 10;
     int                      rounds = 5;
     g1.seed((uint64_t)&ptr1, (uint64_t)&rounds);
@@ -117,7 +207,7 @@ void checkDifferentSeeds()
 
     for (int i = 0; i < CHECKS; ++i) {
         // if (veryVerbose) ... display the #s?
-        ASSERT(g1.getRandom() != g2.getRandom());
+        ASSERT(g1.generate() != g2.generate());
     }
 
     if (verbose)
@@ -151,13 +241,13 @@ void checkAgainstReferenceImplementation()
         1001483646, 1845611368, 3962861838, 2993439405, 3609446448, 3755020234,
         2117479073, 2188374819, 3415172021, 2603755493};
 
-    bdlb::PCGRandomGenerator gen;
+    bdlb::PcgRandomGenerator gen;
     gen.seed(SAMPLE_SEED, SAMPLE_SEQ);
     if (verbose)
         cout << "Checking correctness of " << SIZE_OF_SAMPLES << " samples"
              << endl;
     for (int i = 0; i < SIZE_OF_SAMPLES; ++i) {
-        ASSERT(gen.getRandom() == referenceValues[i]);
+        ASSERT(gen.generate() == referenceValues[i]);
     }
     if (verbose)
         cout << "Correctness test done." << endl;
@@ -180,20 +270,7 @@ int main(int argc, char *argv[])
 
     bsls::ReviewFailureHandlerGuard reviewGuard(&bsls::Review::failByAbort);
 
-    // HJB TBD - how is the numbering of the test cases done?
-    // localtimedescriptor starts with case 14, random starts with case 3; why?
-
-    switch (test) {
-      case 0:  // Zero is always the leading case.
-        checkDifferentSeeds();
-        checkAgainstReferenceImplementation();
-        break;
-      case 1:
-        checkDifferentSeeds();
-        break;
-      case 2:
-        checkAgainstReferenceImplementation();
-        break;
+    switch (test) { case 0:  // Zero is always the leading case.
       case 3: {
         // --------------------------------------------------------------------
         // USAGE EXAMPLE
@@ -218,10 +295,19 @@ int main(int argc, char *argv[])
                     "\n"
                     "============="
                     "\n";
-            // doUsageExample();
+        rollOneDieTwice();
+        rollTwoDice();
+        shareStateAndSequence(); 
         break;
       }
+      case 2:
+        checkAgainstReferenceImplementation();
+        break;
+      case 1:
+        checkDifferentSeeds();
+        break;
     }
+
     if (testStatus > 0) {
         cerr << "Error, non-zero test status = " << testStatus << "." << endl;
     }

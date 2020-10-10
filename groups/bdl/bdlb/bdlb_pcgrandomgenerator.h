@@ -8,12 +8,12 @@ BSLS_IDENT("$Id: $")
 //@PURPOSE: Provide a class to generate random numbers using the PCG algorithm.
 //
 //@CLASSES:
-//  bdlb::PCGRandomGenerator: random number generator
+//  bdlb::PcgRandomGenerator: random number generator
 //
 //@SEE_ALSO: bdlb_random
 //
 //@DESCRIPTION: This component provides a single class,
-// 'bdlb::PCGRandomGenerator', that is used to generate random numbers
+// 'bdlb::PcgRandomGenerator', that is used to generate random numbers
 // employing the PCG algorithm, a high-performance, high-quality RNG.  The PCG
 // technique employs the concepts of permutation functions on tuples and a base
 // linear congruential generator.
@@ -25,20 +25,20 @@ BSLS_IDENT("$Id: $")
 //
 ///Example 1: Simulating a Pair of Dice
 /// - - - - - - - - - - - - - - - - - -
-// This example shows how one might use 'bdlb::PCGRandomGenerator' to create 
+// This example shows how one might use 'bdlb::PcgRandomGenerator' to create 
 // and use a class to simulate the roll of a single die in a game, such as 
 // craps, that uses dice.
 //
 // First, we define the 'Die' class itself:
 //..
-//                      // =========
-//                      // class Die
-//                      // =========
+//                     // =========
+//                     // class Die
+//                     // =========
 //
 //  class Die {
 //
 //      // DATA
-//      bdlb::PCGRandomGenerator d_pcg; // used to generate next role of this die
+//      bdlb::PcgRandomGenerator d_pcg; // used to generate next role of this die
 //
 //    public:
 //      // CREATORS
@@ -49,81 +49,80 @@ BSLS_IDENT("$Id: $")
 //      // MANIPULATORS
 //      int roll();
 //          // Return the next pseudo-random value in the range '[1 .. 6]',
-//          // based on the sequence of values established by the initial seed
-//          // value supplied at construction.
+//          // based on the sequence of values established by the 'initialState'
+//          // and 'streamSelector' values supplied at construction.
 //  };
 //
-//                      // ---------
-//                      // class Die
-//                      // ---------
+//                     // ---------
+//                     // class Die
+//                     // ---------
 //
 //  // CREATORS
 //  inline
 //  Die::Die(bsl::uint64_t initialState, bsl::uint64_t streamSelector)
-//  : d_pcg(initState, streamSelector)
+//  : d_pcg(initialState, streamSelector)
 //  {
 //  }
-//
-//  // MANIPULATORS
-//  int Die::roll()
-//  {
-//      int result;
-//
-//      do {
-//          result = d_pcg.generate() & 7;
-//      } while (result > 5);
-//
-//      return result + 1;
-//  }
+
+// MANIPULATORS
+// int Die::roll()
+// {
+//     int result;
+
+//     do {
+//         result = d_pcg.generate() & 7;
+//     } while (result > 5);
+
+//     return result + 1;
+// }
 //..
 // Now, we can use our 'Dice' class to get the random numbers needed to
 // simulate a game of craps.  Note that the game of craps requires two dice.
 //
 // We can instantiate a single 'Die' and role it twice,
 //..
-//  void rollOneDieTwice()
-//  {
-//      Die a(123, 456);
-//
-//      int d1 = a.roll();
-//      int d2 = a.roll();
-//
-//      cout << "d1 = " << d1 << ", d2 = " << d2 << endl;  // d1 = 3, d2 = 5
-//  }
+// void rollOneDieTwice()
+// {
+//     Die a(123, 456);
+
+//     int d1 = a.roll();
+//     int d2 = a.roll();
+
+//     cout << "d1 = " << d1 << ", d2 = " << d2 << endl;  // d1 = 3, d2 = 5
+// }
 //..
 // Alternatively, we could create two instances of 'Die', with separate initial
-// seeds, and role each one once:
+// states/sequences, and role each one once:
 //..
-//  void rollTwoDice()
-//  {
-//      Die a(123, 123);
-//      Die b(456, 456);
-//
-//      int d1 = a.roll();
-//      int d2 = b.roll();
-//
-//      cout << "d1 = " << d1 << ", d2 = " << d2 << endl;  // d1 = 3, d2 = 1
-//  }
+// void rollTwoDice()
+// {
+//     Die a(123, 123);
+//     Die b(456, 456);
+
+//     int d1 = a.roll();
+//     int d2 = b.roll();
+
+//     cout << "d1 = " << d1 << ", d2 = " << d2 << endl;  // d1 = 3, d2 = 1
+// }
 //..
 // Note that the specification of separate seeds is important to produce a
 // proper distribution for our game.  If we had shared the seed value each die
 // would always produce the same sequence of values as the other.
 //..
-//  void shareSeed()
-//  {
-//      Die a(123, 456);  // BAD IDEA
-//      Die a(123, 456);  // BAD IDEA
-//
-//      int d1 = a.roll();
-//      int d2 = b.roll();
-//      assert(d2 == d1);
-//
-//  }
+// void shareStateAndSequence()
+// {
+//     Die a(123, 456);  // BAD IDEA
+//     Die b(123, 456);  // BAD IDEA
+
+//     int d1 = a.roll();
+//     int d2 = b.roll();
+//     ASSERT(d2 == d1);
+// }
 //..
 ///Example 2: Generating a random 32-bit number
 ///- - - - - - - - - - - - - - - - - - - - - - -
-// The PCGRandomGenerator constructor takes two 64-bit constants (the initial
-// state, and the rng sequence selector.  Instances of 'PCGRandomGenerator' with
+// The PcgRandomGenerator constructor takes two 64-bit constants (the initial
+// state, and the rng sequence selector.  Instances of 'PcgRandomGenerator' with
 // different sequence selectors will never have random sequences that coincide.
 // In order to obtain nondeterministic output for each instance, on a Unix
 // system random bytes can be obtained from '/dev/urandom'.  The component 
@@ -141,7 +140,7 @@ BSLS_IDENT("$Id: $")
 //           streamSelector = time(NULL) ^
 //                   (intptr_t)&bsl::printf;  // fallback streamSelector
 //  }
-//  bdlb::PCGRandomGenerator  rng(state, streamSelector);
+//  bdlb::PcgRandomGenerator  rng(state, streamSelector);
 //  bsl::uint32_t randomInt = rng.generate();
 //..
 
@@ -151,20 +150,20 @@ namespace BloombergLP {
 namespace bdlb {
 
                                  // ========================
-                                 // class PCGRandomGenerator
+                                 // class PcgRandomGenerator
                                  // ========================
-class PCGRandomGenerator {
-    // This mechanism class implements a random number generator (RNG) based on
+class PcgRandomGenerator {
+    // This class implements a random number generator (RNG) based on
     // the PCG algorithm.  PCG stands for "permuted congruential generator."
     // The state is 64 bits.  It uses a so-called stream selector, also 64
     // bits.  'initState' is the starting state for the RNG.  Any
-    // 64-bit value may be passed. 'streamSelector' selects the output sequence
+    // 64-bit value may be passed.  'streamSelector' selects the output sequence
     // for the RNG.  Any 64-bit value may be passed, although only the low 63
     // bits are significant.  There are 2^63 different RNGs available, and
     // 'streamSelector' selects from among them.  Invoking different instances
     // with the identical 'initState' and 'streamSelector' will result in the
     // same sequence of random numbers from subsequent invocations of
-    // getRandom().  For details of the algorithm,see
+    // generate().  For details of the algorithm,see
     // http://www.pcg-random.org.
 
   private:
@@ -174,25 +173,25 @@ class PCGRandomGenerator {
     bsl::uint64_t d_streamSelector;  // selected sequence (stream)
 
     // FRIENDS
-    friend bool operator==(const PCGRandomGenerator& lhs,
-                           const PCGRandomGenerator& rhs);
+    friend bool operator==(const PcgRandomGenerator& lhs,
+                           const PcgRandomGenerator& rhs);
 
   public:
     // CREATORS
-    PCGRandomGenerator(bsl::uint64_t initState      = 0,
+    PcgRandomGenerator(bsl::uint64_t initState      = 0,
                        bsl::uint64_t streamSelector = 1);
-        // Create a 'PCGRandomGenerator' object and seed it with the optionally
+        // Create a 'PcgRandomGenerator' object and seed it with the optionally
         // specified 'initState' and 'streamSelector.'  If 'initState' is not
         // specified, 0 is used as the initial state.  If 'streamSelector' is
         // not specified, 1 is used as the stream selector.
 
-    //! PCGRandomGenerator(const PCGRandomGenerator& original) = default;
-        // Create a 'PCGRandomGenerator' object having the same state as the
+    //! PcgRandomGenerator(const PcgRandomGenerator& original) = default;
+        // Create a 'PcgRandomGenerator' object having the same state as the
         // specified 'original' object. Note that this newly created object
         // will generate the same sequence of numbers as the 'original' object.
 
     // MANIPULATORS
-    //! PCGRandomGenerator& operator=(const PCGRandomGenerator& rhs) = default;
+    //! PcgRandomGenerator& operator=(const PcgRandomGenerator& rhs) = default;
         // Assign to this object the value of the specified 'rhs' object, and
         // return a non-'const' reference to this object. Note that this newly
         // created object will generate the same sequence of numbers as the
@@ -207,15 +206,15 @@ class PCGRandomGenerator {
 };
 
 // FREE OPERATORS
-bool operator==(const PCGRandomGenerator& lhs, const PCGRandomGenerator& rhs);
+bool operator==(const PcgRandomGenerator& lhs, const PcgRandomGenerator& rhs);
     // Return 'true' if the specified 'lhs' and 'rhs' objects have the same
-    // value, and 'false' otherwise.  Two 'PCGRandomGenerator' objects have the
+    // value, and 'false' otherwise.  Two 'PcgRandomGenerator' objects have the
     // same value if both of the corresponding values of their 'd_state' and
     // 'd_streamSelector' attributes are the same.
 
-bool operator!=(const PCGRandomGenerator& lhs, const PCGRandomGenerator& rhs);
+bool operator!=(const PcgRandomGenerator& lhs, const PcgRandomGenerator& rhs);
     // Return 'true' if the specified 'lhs' and 'rhs' objects do not have the
-    // same value, and 'false' otherwise.  Two 'PCGRandomGenerator' objects do
+    // same value, and 'false' otherwise.  Two 'PcgRandomGenerator' objects do
     // not have the same value if either of the corresponding values of their
     // 'd_state' or 'd_streamSelector' attributes are not the same.
 
@@ -224,12 +223,12 @@ bool operator!=(const PCGRandomGenerator& lhs, const PCGRandomGenerator& rhs);
 // ============================================================================
 
                           // ------------------------
-                          // class PCGRandomGenerator
+                          // class PcgRandomGenerator
                           // ------------------------
 
 // CREATORS
 inline
-PCGRandomGenerator::PCGRandomGenerator(bsl::uint64_t initState,
+PcgRandomGenerator::PcgRandomGenerator(bsl::uint64_t initState,
                                        bsl::uint64_t streamSelector)
 {
     seed(initState, streamSelector);
@@ -237,7 +236,7 @@ PCGRandomGenerator::PCGRandomGenerator(bsl::uint64_t initState,
 
 // MANIPULATORS
 inline
-void PCGRandomGenerator::seed(bsl::uint64_t initState,
+void PcgRandomGenerator::seed(bsl::uint64_t initState,
                               bsl::uint64_t streamSelector)
 {
     d_state          = 0U;
@@ -248,7 +247,7 @@ void PCGRandomGenerator::seed(bsl::uint64_t initState,
 }
 
 inline
-bsl::uint32_t PCGRandomGenerator::generate()
+bsl::uint32_t PcgRandomGenerator::generate()
 {
     bsl::uint64_t oldstate = d_state;
     d_state = oldstate * 6364136223846793005ULL + d_streamSelector;
@@ -262,16 +261,16 @@ bsl::uint32_t PCGRandomGenerator::generate()
 
 // FREE OPERATORS
 inline
-bool bdlb::operator==(const PCGRandomGenerator& lhs,
-                      const PCGRandomGenerator& rhs)
+bool bdlb::operator==(const PcgRandomGenerator& lhs,
+                      const PcgRandomGenerator& rhs)
 {
     return lhs.d_state == rhs.d_state &&
            lhs.d_streamSelector == rhs.d_streamSelector;
 }
 
 inline
-bool bdlb::operator!=(const PCGRandomGenerator& lhs,
-                      const PCGRandomGenerator& rhs)
+bool bdlb::operator!=(const PcgRandomGenerator& lhs,
+                      const PcgRandomGenerator& rhs)
 {
     return !(lhs == rhs);
 }

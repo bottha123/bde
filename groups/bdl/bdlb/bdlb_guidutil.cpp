@@ -142,7 +142,7 @@ void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
     unsigned char *bytes = result;
     unsigned char *end   = bytes + numGuids * Guid::k_GUID_NUM_BYTES;
 
-    static bdlb::PCGRandomGenerator *pcgSingletonPtr;
+    static bdlb::PcgRandomGenerator *pcgSingletonPtr;
     BSLMT_ONCE_DO
     {
         uint64_t state;
@@ -156,7 +156,7 @@ void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
             streamSelector = time(NULL) ^
                    (intptr_t)&bsl::printf;  // fallback streamSelector
         }
-        static bdlb::PCGRandomGenerator pcgSingleton(state, streamSelector);
+        static bdlb::PcgRandomGenerator pcgSingleton(state, streamSelector);
         pcgSingletonPtr = &pcgSingleton;
     }
     {

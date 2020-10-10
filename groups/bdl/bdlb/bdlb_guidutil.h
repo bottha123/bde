@@ -211,7 +211,8 @@ struct GuidUtil {
         // The behavior is undefined unless 'result' refers to a contiguous
         // sequence of at least 'numGuids' Guid objects.  Note that this
         // function uses the PCG random engine to generate high quality, albeit
-        // not cryptographically secure, random numbers for Guids.
+        // not cryptographically secure, random numbers for Guids. This method
+        // is typically faster than generating cryptographically secure Guids.
 
     static int guidFromString(Guid *result, bslstl::StringRef guidString);
         // Parse the specified 'guidString' (in {GUID String Format}) and load

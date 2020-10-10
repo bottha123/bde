@@ -29,8 +29,10 @@ using namespace bsl;
 //                             --------
 // The component under test is a utility that defines two overloads of a
 // function.  One overload is more general and is used to implement the other.
-// The more general overload is tested first, albeit in within the same test
+// The more general overload is tested first, albeit within the same test
 // case as the other.
+// The component also defines a function that generates random numbers using
+// the PCG algorithm.
 // ----------------------------------------------------------------------------
 // CLASS METHODS
 // [ 2] static int generate15(int *nextSeed, int seed);
@@ -262,6 +264,7 @@ int main(int argc, char *argv[])
         // Testing:
         //   static int generate15(int *nextSeed, int seed);
         //   static int generate15(int *seed);
+        //   static bsl::uint32_t generatePcg(PcgRandomGenerator *generator);
         // --------------------------------------------------------------------
 
         if (verbose) cout << "\n" "SEED TEST" "\n"
@@ -301,6 +304,30 @@ int main(int argc, char *argv[])
             ASSERT(0 == bsl::memcmp(sequence1, sequence2, sizeof(sequence1)));
             ASSERT(0 != bsl::memcmp(sequence2, sequence3, sizeof(sequence2)));
         }
+
+        if (veryVerbose) { cout << "\ngeneratePcg" << bsl::endl; }
+        {
+            bsl::uint32_t sequences[5][32];
+
+            bdlb::PcgRandomGenerator pcg1(555, 1);
+            bdlb::PcgRandomGenerator pcg2(555, 1);
+            bdlb::PcgRandomGenerator pcg3(555, 2);
+            bdlb::PcgRandomGenerator pcg4(556, 1);
+            bdlb::PcgRandomGenerator pcg5(556, 2);
+
+            
+            for (int i = 0; i < 32; ++i) {
+                sequences[0][i] = bdlb::Random::generatePcg(&pcg1);
+                sequences[1][i] = bdlb::Random::generatePcg(&pcg2);
+                sequences[2][i] = bdlb::Random::generatePcg(&pcg3);
+                sequences[3][i] = bdlb::Random::generatePcg(&pcg4);
+                sequences[4][i] = bdlb::Random::generatePcg(&pcg5);
+            }
+            ASSERT(0 == bsl::memcmp(sequences[0], sequences[1], sizeof(sequences[0])));
+            ASSERT(0 != bsl::memcmp(sequences[0], sequences[2], sizeof(sequences[0])));
+            ASSERT(0 != bsl::memcmp(sequences[0], sequences[3], sizeof(sequences[0])));
+            ASSERT(0 != bsl::memcmp(sequences[0], sequences[4], sizeof(sequences[0])));
+        }
       } break;
       case 1: {
         // --------------------------------------------------------------------
@@ -323,30 +350,58 @@ int main(int argc, char *argv[])
                                   "==============" "\n";
 
         enum { NUM_ITERATIONS = 2000 };
+        {
+            int seed = 0;
+            int cnt  = 0;
 
-        int seed = 0;
-        int cnt  = 0;
+            for (int i = 0; i < NUM_ITERATIONS; ++i) {
+                int rand = bdlb::Random::generate15(&seed);
+                ASSERT(rand < 0x10000);
+                ASSERT(rand >= 0);
 
-        for (int i = 0; i < NUM_ITERATIONS; ++i) {
-            int rand = bdlb::Random::generate15(&seed);
-            ASSERT(rand < 0x10000);
-            ASSERT(rand >= 0);
+                if (veryVerbose) {
+                    if (0 == i % 100) {
+                        T_ P_(i) P_(seed) P(rand);
+                    }
+                }
 
-            if (veryVerbose) {
-                if (0 == i % 100) {
-                    T_ P_(i) P_(seed) P(rand);
+                for (int b = 0; b < 15; ++b) {
+                    cnt += rand & 1;
+                    rand >>= 1;
                 }
             }
 
-            for (int b = 0; b < 15; ++b) {
-                cnt   += rand & 1;
-                rand >>= 1;
-            }
+            double expected = (NUM_ITERATIONS * 15) / 2;
+            ASSERT(cnt < (expected * 1.1));
+            ASSERT(cnt > (expected * 0.9));
         }
 
-        double expected = (NUM_ITERATIONS * 15) / 2;
-        ASSERT(cnt < (expected * 1.1));
-        ASSERT(cnt > (expected * 0.9));
+        {
+            int cnt  = 0;
+
+            uint64_t state = 123;
+            uint64_t streamSelector = 456;
+            bdlb::PcgRandomGenerator pcg(state, streamSelector);
+            T_ P_(state) P_(streamSelector);
+            for (int i = 0; i < NUM_ITERATIONS; ++i) {
+                uint32_t rand = bdlb::Random::generatePcg(&pcg);
+                
+                if (veryVerbose) {
+                    if (0 == i % 100) {
+                      T_ P_(i) P(rand);
+                    }
+                }
+
+                for (int b = 0; b < 32; ++b) {
+                    cnt += rand & 1;
+                    rand >>= 1;
+                }
+            }
+
+            double expected = (NUM_ITERATIONS * 32) / 2;
+            ASSERT(cnt < (expected * 1.1));
+            ASSERT(cnt > (expected * 0.9));
+        }
 
       } break;
       default: {
