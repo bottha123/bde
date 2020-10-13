@@ -16,7 +16,16 @@ BSLS_IDENT("$Id: $")
 // 'bdlb::PcgRandomGenerator', that is used to generate random numbers
 // employing the PCG algorithm, a high-performance, high-quality RNG.  The PCG
 // technique employs the concepts of permutation functions on tuples and a base
-// linear congruential generator.
+// linear congruential generator. In the PCG algorithm, rather than a single
+// seed parameter, there are two parameters, 'initState' and 'streamSelector'.
+// This is to address a potential hazard when multiple instances of a random
+// number generator are used: an unintended correlation between their outputs.
+// For example, if we allow them to have the same internal state (e.g.
+// mistakenly seeding both with the current time in seconds), they will output
+// the exact same sequence of numbers.  Employing a 'streamSelector' enables
+// the the same 'initState' to generate unique sequences.  Please refer to
+// O’Neill (2014) at https://www.pcg-random.org/pdf/hmc-cs-2014-0905.pdf for
+// further details of the algorithm.
 //
 //
 ///Usage
@@ -184,16 +193,7 @@ class PcgRandomGenerator {
         // 'streamSelector' selects from among them.  Invoking different
         // instances with the identical 'initState' and 'streamSelector' will
         // result in the same sequence of random numbers from subsequent
-        // invocations of generate(). Why two values ('initState' and
-        // 'streamSelector') instead of a simple seed?  There is a potential
-        // hazard if multiple instances of a random number generator are used:
-        // an unintended correlation between their outputs.  For example, if we
-        // allow them to have the same internal state (e.g. mistakenly seeding
-        // both with the current time in seconds), they will output the exact
-        // same sequence of numbers.  Employing a stream selector enables the
-        // use of the same internal state.  Please refer to O’Neill (2014) at
-        // https://www.pcg-random.org/pdf/hmc-cs-2014-0905.pdf for further
-        // details of the algorithm.
+        // invocations of generate(). 
 
     //! PcgRandomGenerator(const PcgRandomGenerator& original) = default;
         // Create a 'PcgRandomGenerator' object having the same state as the

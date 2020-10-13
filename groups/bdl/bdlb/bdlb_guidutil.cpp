@@ -170,12 +170,7 @@ void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
                                               sizeof(state))) {
             state = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback state
         }
-        uint64_t streamSelector;
-        if (0 != RandomDevice::getRandomBytes((unsigned char *)&streamSelector,
-                                              sizeof(streamSelector))) {
-            streamSelector = time(NULL) ^
-                   (intptr_t)&bsl::printf;  // fallback streamSelector
-        }
+        uint64_t streamSelector = 1u;
         static bdlb::PcgRandomGenerator pcgSingleton(state, streamSelector);
         pcgSingletonPtr = &pcgSingleton;
     }

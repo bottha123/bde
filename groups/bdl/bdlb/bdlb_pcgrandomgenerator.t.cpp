@@ -22,9 +22,9 @@ using namespace bsl;
 //
 // Primary Manipulators:
 //: o 'seed'
-//: o 'getRandom'
+//: o 'generate'
 //
-// This mechanism class  provides a 'seed' function takes as parameters 2
+// This mechanism class  provides a 'seed' function which takes as parameters 2
 // values: an 'initState' and a 'streamSelector'.
 //
 //
@@ -196,10 +196,10 @@ int Die::roll()
 void checkDifferentSeeds()
 {
     bdlb::PcgRandomGenerator g1, g2;
-    int                      ptr1   = 10;
-    int                      rounds = 5;
-    g1.seed((uint64_t)&ptr1, (uint64_t)&rounds);
-    g2.seed(((uint64_t)&ptr1) + 1, (uint64_t)&rounds);
+    int                      initState      = 10;
+    int                      streamSelector = 5;
+    g1.seed((uint64_t)&initState, (uint64_t)&streamSelector);
+    g2.seed(((uint64_t)&initState) + 1, (uint64_t)&streamSelector);
 
     const int CHECKS = 100;
     if (verbose)

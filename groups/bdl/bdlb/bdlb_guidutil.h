@@ -37,6 +37,14 @@ BSLS_IDENT("$Id: $")
 //
 // <X>                ::=  [0123456789ABCDEFabcdef]{2}
 //
+///RANDOMNESS:
+///-----------
+// There are two different ways provided for generating GUIDs:
+// 1. 'generate': comparatively more secure but slower
+// 2. 'generateNonSecure': comparatively less secure but faster
+// 'generateNonSecure' employs the PCG random engine toproduce 
+// high-quality, but not cryptographically secure, GUIDs.
+//
 // EXAMPLES:
 // ---------
 // { 87654321-AAAA-BBBB-CCCC-012345654321 }
@@ -210,8 +218,8 @@ struct GuidUtil {
         // The behavior is undefined unless 'result' refers to a contiguous
         // sequence of at least 'numGuids' Guid objects.  Note that this
         // function uses the PCG random engine to generate high quality, albeit
-        // not cryptographically secure, random numbers for Guids. This method
-        // is typically faster than generating cryptographically secure Guids.
+        // not cryptographically secure, random numbers for GUIDs. This method
+        // is typically faster than generating cryptographically secure GUIDs.
 
     static void generateNonSecure(unsigned char *result,
                                   bsl::size_t    numGuids = 1);
@@ -225,8 +233,8 @@ struct GuidUtil {
         // The behavior is undefined unless 'result' refers to a contiguous
         // sequence of at least 'numGuids' Guid objects.  Note that this
         // function uses the PCG random engine to generate high quality, albeit
-        // not cryptographically secure, random numbers for Guids. This method
-        // is typically faster than generating cryptographically secure Guids.
+        // not cryptographically secure, random numbers for GUIDs. This method
+        // is typically faster than generating cryptographically secure GUIDs.
 
     static Guid generateNonSecure();
         // Generate and return a single GUID meeting the RFC 4122 version 4
@@ -234,8 +242,8 @@ struct GuidUtil {
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
         // Note that this function uses the PCG random engine to generate high
         // quality, albeit not cryptographically secure, random numbers for
-        // Guids. This method is typically faster than generating
-        // cryptographically secure Guids.
+        // GUIDs. This method is typically faster than generating
+        // cryptographically secure GUIDs.
 
     static int guidFromString(Guid *result, bslstl::StringRef guidString);
         // Parse the specified 'guidString' (in {GUID String Format}) and load
