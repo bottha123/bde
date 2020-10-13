@@ -158,7 +158,7 @@ struct Random {
 
     static bsl::uint32_t generatePcg(PcgRandomGenerator *generator);
         // Return the next unsigned 32-bit random number generated from the
-        // specified PcgRandomGenerator.
+        // specified 'PcgRandomGenerator'.
 };
 
 // ============================================================================

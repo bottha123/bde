@@ -300,6 +300,40 @@ int main(int argc, char *argv[])
     switch (test)  { case 0:
       case 8: {
         // --------------------------------------------------------------------
+        // USAGE EXAMPLE
+        //   Extracted from component header file.
+        //
+        // Concerns:
+        //: 1 The usage example provided in the component header file compiles,
+        //:   links, and runs as shown.
+        //
+        // Plan:
+        //: 1 Incorporate usage example from header into test driver, replace
+        //:   leading comment characters with spaces, replace 'assert' with
+        //:   'ASSERT', and insert 'if (veryVerbose)' before all output
+        //:   operations.  (C-1)
+        //
+        // Testing:
+        //   USAGE EXAMPLE
+        // --------------------------------------------------------------------
+        if (verbose) cout << endl
+                          << "USAGE EXAMPLE" << endl
+                          << "=============" << endl;
+//..
+//  Next, we create some employees:
+//..
+        MyEmployee e1("Foo Bar"     , 1011970);
+        MyEmployee e2("John Doe"    , 12345);
+        MyEmployee e3("Joe Six-pack", 1);
+//..
+//  Finally, we verify that the generated GUIDs are unique.
+///..
+        ASSERT(e1 < e2 || e2 < e1);
+        ASSERT(e2 < e3 || e3 < e2);
+        ASSERT(e1 < e3 || e3 < e1);
+      } break;
+      case 7: {
+        // --------------------------------------------------------------------
         // TESTING 'generateNonSecure'
         //
         // Concerns:
@@ -389,40 +423,6 @@ int main(int argc, char *argv[])
                 LOOP2_ASSERT(i, j, guids[j] == Obj());
             }
         }
-      } break;
-      case 7: {
-        // --------------------------------------------------------------------
-        // USAGE EXAMPLE
-        //   Extracted from component header file.
-        //
-        // Concerns:
-        //: 1 The usage example provided in the component header file compiles,
-        //:   links, and runs as shown.
-        //
-        // Plan:
-        //: 1 Incorporate usage example from header into test driver, replace
-        //:   leading comment characters with spaces, replace 'assert' with
-        //:   'ASSERT', and insert 'if (veryVerbose)' before all output
-        //:   operations.  (C-1)
-        //
-        // Testing:
-        //   USAGE EXAMPLE
-        // --------------------------------------------------------------------
-        if (verbose) cout << endl
-                          << "USAGE EXAMPLE" << endl
-                          << "=============" << endl;
-//..
-//  Next, we create some employees:
-//..
-        MyEmployee e1("Foo Bar"     , 1011970);
-        MyEmployee e2("John Doe"    , 12345);
-        MyEmployee e3("Joe Six-pack", 1);
-//..
-//  Finally, we verify that the generated GUIDs are unique.
-///..
-        ASSERT(e1 < e2 || e2 < e1);
-        ASSERT(e2 < e3 || e3 < e2);
-        ASSERT(e1 < e3 || e3 < e1);
       } break;
       case 6: {
         // --------------------------------------------------------------------

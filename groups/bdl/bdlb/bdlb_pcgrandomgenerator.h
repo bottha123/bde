@@ -63,16 +63,16 @@ BSLS_IDENT("$Id: $")
 //  : d_pcg(initialState, streamSelector)
 //  {
 //  }
-
+//
 // MANIPULATORS
 // int Die::roll()
 // {
 //     int result;
-
+//
 //     do {
 //         result = d_pcg.generate() & 7;
 //     } while (result > 5);
-
+//
 //     return result + 1;
 // }
 //..
@@ -84,10 +84,10 @@ BSLS_IDENT("$Id: $")
 // void rollOneDieTwice()
 // {
 //     Die a(123, 456);
-
+//
 //     int d1 = a.roll();
 //     int d2 = a.roll();
-
+//
 //     cout << "d1 = " << d1 << ", d2 = " << d2 << endl;  // d1 = 3, d2 = 5
 // }
 //..
@@ -98,10 +98,10 @@ BSLS_IDENT("$Id: $")
 // {
 //     Die a(123, 123);
 //     Die b(456, 456);
-
+//
 //     int d1 = a.roll();
 //     int d2 = b.roll();
-
+//
 //     cout << "d1 = " << d1 << ", d2 = " << d2 << endl;  // d1 = 3, d2 = 1
 // }
 //..
@@ -113,10 +113,10 @@ BSLS_IDENT("$Id: $")
 // {
 //     Die a(123, 456);  // BAD IDEA
 //     Die b(123, 456);  // BAD IDEA
-
+//
 //     int d1 = a.roll();
 //     int d2 = b.roll();
-//     ASSERT(d2 == d1);
+//     assert(d2 == d1);
 // }
 //..
 ///Example 2: Generating a random 32-bit number
@@ -153,11 +153,11 @@ namespace bdlb {
                                  // class PcgRandomGenerator
                                  // ========================
 class PcgRandomGenerator {
-    // This class implements a random number generator (RNG) based on
-    // the PCG algorithm.  PCG stands for "permuted congruential generator."
-    // The state is 64 bits.  It uses a so-called stream selector, also 64
-    // bits. For details, please refer below to the constructor.  For details of the algorithm,see
-    // http://www.pcg-random.org.
+    // This class implements a random number generator (RNG) based on the PCG
+    // algorithm.  PCG stands for "permuted congruential generator." The state
+    // is 64 bits.  It uses a so-called stream selector, also 64 bits. For
+    // details, please refer below to the constructor.  For details of the
+    // algorithm,see http://www.pcg-random.org.
 
   private:
     // DATA
