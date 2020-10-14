@@ -361,7 +361,7 @@ int main(int argc, char *argv[])
         // --------------------------------------------------------------------
         if (verbose) cout << endl
                           << "TESTING 'generateNonSecure'" << endl
-                          << "==================" << endl;
+                          << "===========================" << endl;
         enum  { NUM_ITERS = 15 };
 
         Obj guids[NUM_ITERS + 1]; // one larger to be allow checking bounds.
@@ -398,8 +398,8 @@ int main(int argc, char *argv[])
         }
         if (veryVerbose) {
             cout << endl
-                 << "Get multiple GUIDs." << endl
-                 << "-------------------" << endl;
+                 << "Get multiple generateNonSecure (PCG) GUIDs." << endl
+                 << "-------------------------------------------" << endl;
         }
         for (int i = 0; i < NUM_ITERS; ++i) {
             bsl::memset(guids, 0, sizeof(guids));
