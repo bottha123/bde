@@ -114,6 +114,17 @@ int vaildateGuidString(bslstl::StringRef guidString)
     return 0;
 }
 
+void makeRfc4122Compliant(unsigned char *bytes, unsigned char *end)
+{
+    // Set bits to comply with RFC 4122 version 4
+    while (bytes != end) {
+        typedef unsigned char uc;
+        bytes[6] = uc(0x40 | (bytes[6] & 0x0F));
+        bytes[8] = uc(0x80 | (bytes[8] & 0x3F));
+        bytes += Guid::k_GUID_NUM_BYTES;
+    }
+}
+
 }  // close unnamed namespace
 
 // CLASS METHODS
@@ -122,19 +133,6 @@ Guid GuidUtil::generate()
     Guid result;
     generate(&result);
     return result;
-}
-
-namespace {
-inline
-void makeRfc4122Compliant(unsigned char *bytes, unsigned char *end)
-{
-    while (bytes != end) {
-        typedef unsigned char uc;
-        bytes[6] = uc(0x40 | (bytes[6] & 0x0F));
-        bytes[8] = uc(0x80 | (bytes[8] & 0x3F));
-        bytes += Guid::k_GUID_NUM_BYTES;
-    }
-}
 }
 
 void GuidUtil::generate(unsigned char *result, bsl::size_t numGuids)

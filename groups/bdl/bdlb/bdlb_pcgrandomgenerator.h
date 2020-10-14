@@ -18,14 +18,15 @@ BSLS_IDENT("$Id: $")
 // technique employs the concepts of permutation functions on tuples and a base
 // linear congruential generator. In the PCG algorithm, rather than a single
 // seed parameter, there are two parameters, 'initState' and 'streamSelector'.
-// This is to address a potential hazard when multiple instances of a random
-// number generator are used: an unintended correlation between their outputs.
-// For example, if we allow them to have the same internal state (e.g.
-// mistakenly seeding both with the current time in seconds), they will output
-// the exact same sequence of numbers.  Employing a 'streamSelector' enables
-// the the same 'initState' to generate unique sequences.  Please refer to
-// O’Neill (2014) at https://www.pcg-random.org/pdf/hmc-cs-2014-0905.pdf for
-// further details of the algorithm.
+// The use of a second parameter ('streamSelector') is to address a potential
+// hazard when multiple instances of a random number generator are used: an
+// unintended correlation between their outputs.  For example, if we allow them
+// to have the same internal state (e.g.  mistakenly seeding them with the
+// current time in seconds), they will output the exact same sequence of
+// numbers.  Employing a 'streamSelector' enables the the same 'initState' to
+// generate unique sequences.  Please refer to O’Neill (2014) at
+// https://www.pcg-random.org/pdf/hmc-cs-2014-0905.pdf for further details of
+// the algorithm.
 //
 //
 ///Usage
@@ -166,7 +167,7 @@ class PcgRandomGenerator {
     // algorithm.  PCG stands for "permuted congruential generator." The state
     // is 64 bits.  It uses a so-called stream selector, also 64 bits. For
     // details, please refer below to the constructor.  For details of the
-    // algorithm,see http://www.pcg-random.org.
+    // algorithm, see http://www.pcg-random.org.
 
   private:
     // DATA
