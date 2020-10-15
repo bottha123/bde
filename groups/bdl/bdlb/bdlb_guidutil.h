@@ -37,13 +37,6 @@ BSLS_IDENT("$Id: $")
 //
 // <X>                ::=  [0123456789ABCDEFabcdef]{2}
 //
-///RANDOMNESS:
-///-----------
-// There are two different ways provided for generating GUIDs:
-// 1. 'generate': comparatively more secure but slower
-// 2. 'generateNonSecure': comparatively less secure but faster
-// 'generateNonSecure' employs the PCG random engine toproduce 
-// high-quality, but not cryptographically secure, GUIDs.
 //
 // EXAMPLES:
 // ---------
@@ -51,6 +44,16 @@ BSLS_IDENT("$Id: $")
 // 00010203-0405-0607-0809-101112131415
 // [00112233445566778899aAbBcCdDeEfF]
 //..
+//
+///Cryptographic Security:
+///-----------------------
+// 'GuidUtil' provides two families of functions for generating GUIDs:
+// 'generate' and 'generateNonSecure'. The primary difference between them is
+// cryptographic security of the resulting GUIDs and performance. The slower
+// 'generate' methods aim to produce cryptographically secure GUIDs by
+// accessing the underlying system resources to obtain truly random numbers,
+// whereas the faster 'generateNonSecure' methods use a fast high-quality (but
+// not strictly cryptographically secure) in-process random-number generator.
 //
 ///Usage
 ///-----
@@ -217,9 +220,9 @@ struct GuidUtil {
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
         // The behavior is undefined unless 'result' refers to a contiguous
         // sequence of at least 'numGuids' Guid objects.  Note that this
-        // function uses the PCG random engine to generate high quality, albeit
-        // not cryptographically secure, random numbers for GUIDs. This method
-        // is typically faster than generating cryptographically secure GUIDs.
+        // function generates high quality, albeit not cryptographically
+        // secure, random numbers for GUIDs. This method is typically faster
+        // than generating cryptographically secure GUIDs.
 
     static void generateNonSecure(unsigned char *result,
                                   bsl::size_t    numGuids = 1);
