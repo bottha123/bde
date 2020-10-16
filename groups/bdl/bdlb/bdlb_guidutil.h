@@ -12,9 +12,9 @@ BSLS_IDENT("$Id: $")
 //
 //@SEE_ALSO: bdlb::Guid
 //
-//@DESCRIPTION: This component provides a struct, 'bdlb::GuidUtil', that
-// serves as a namespace for utility functions that create and work with
-// Globally Unique Identifiers (GUIDs).
+//@DESCRIPTION: This component provides a struct, 'bdlb::GuidUtil', that serves
+// as a namespace for utility functions that create and work with Globally
+// Unique Identifiers (GUIDs).
 //
 ///Grammar for GUIDs Used in 'GuidFromString'
 ///------------------------------------------
@@ -37,12 +37,23 @@ BSLS_IDENT("$Id: $")
 //
 // <X>                ::=  [0123456789ABCDEFabcdef]{2}
 //
+//
 // EXAMPLES:
 // ---------
 // { 87654321-AAAA-BBBB-CCCC-012345654321 }
 // 00010203-0405-0607-0809-101112131415
 // [00112233445566778899aAbBcCdDeEfF]
 //..
+//
+///Cryptographic Security:
+///-----------------------
+// 'GuidUtil' provides two families of functions for generating GUIDs:
+// 'generate' and 'generateNonSecure'.  The primary difference between them is
+// the cryptographic security of the resulting GUIDs and performance.  The
+// slower 'generate' methods aim to produce cryptographically secure GUIDs by
+// accessing the underlying system resources to obtain truly random numbers,
+// whereas the faster 'generateNonSecure' methods use a fast high-quality (but
+// not strictly cryptographically secure) in-process random-number generator.
 //
 ///Usage
 ///-----
@@ -198,6 +209,40 @@ struct GuidUtil {
         // Generate and return a single GUID meeting the RFC 4122 version 4
         // specification, consisting of 122 randomly generated bits, two
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
+
+    static void generateNonSecure(Guid *result, bsl::size_t numGuids = 1);
+        // Generate a sequence of GUIDs meeting the RFC 4122 version 4
+        // specification, and load the resulting GUIDs into the array referred
+        // to by the specified 'result'.  Optionally specify 'numGuids',
+        // indicating the number of GUIDs to load into the 'result' array.  If
+        // 'numGuids' is not supplied, a default of 1 is used.  An RFC 4122
+        // version 4 GUID consists of 122 randomly generated bits, two
+        // 'variant' bits set to '10' and four 'version' bits set to '0100'.
+        // The behavior is undefined unless 'result' refers to a contiguous
+        // sequence of at least 'numGuids' Guid objects.  Note that this
+        // function generates high quality, albeit not cryptographically
+        // secure, random numbers for GUIDs. 
+
+    static void generateNonSecure(unsigned char *result,
+                                  bsl::size_t    numGuids = 1);
+        // Generate a sequence of GUIDs meeting the RFC 4122 version 4
+        // specification, and load the resulting GUIDs into the array referred
+        // to by the specified 'result'.  Optionally specify 'numGuids',
+        // indicating the number of GUIDs to load into the 'result' array.  If
+        // 'numGuids' is not supplied, a default of 1 is used.  An RFC 4122
+        // version 4 GUID consists of 122 randomly generated bits, two
+        // 'variant' bits set to '10' and four 'version' bits set to '0100'.
+        // The behavior is undefined unless 'result' refers to a contiguous
+        // sequence of at least 'numGuids' Guid objects.  Note that this
+        // function generates high quality, albeit not cryptographically
+        // secure, random numbers for GUIDs. 
+
+    static Guid generateNonSecure();
+        // Generate and return a single GUID meeting the RFC 4122 version 4
+        // specification, consisting of 122 randomly generated bits, two
+        // 'variant' bits set to '10' and four 'version' bits set to '0100'.
+        // Note that this function generates high quality, albeit not
+        // cryptographically secure, random numbers for GUIDs.
 
     static int guidFromString(Guid *result, bslstl::StringRef guidString);
         // Parse the specified 'guidString' (in {GUID String Format}) and load

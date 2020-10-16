@@ -5,12 +5,17 @@
 BSLS_IDENT_RCSID(RCSid_bdlb_guidutil_cpp,"$Id$ $CSID$")
 
 #include <bdlb_guid.h>
+#include <bdlb_pcgrandomgenerator.h>
 #include <bdlb_randomdevice.h>
 
 #include <bslmf_assert.h>
 #include <bsls_byteorder.h>
+#include <bslmt_lockguard.h>
+#include <bslmt_mutex.h>
+#include <bslmt_once.h>
 #include <bsls_platform.h>
 
+#include <bsl_cstdio.h>
 #include <bsl_cstring.h>
 #include <bsl_iostream.h>
 #include <bsl_sstream.h>
@@ -109,6 +114,17 @@ int vaildateGuidString(bslstl::StringRef guidString)
     return 0;
 }
 
+void makeRfc4122Compliant(unsigned char *bytes, unsigned char *end)
+{
+    // Set bits to comply with RFC 4122 version 4
+    while (bytes != end) {
+        typedef unsigned char uc;
+        bytes[6] = uc(0x40 | (bytes[6] & 0x0F));
+        bytes[8] = uc(0x80 | (bytes[8] & 0x3F));
+        bytes += Guid::k_GUID_NUM_BYTES;
+    }
+}
+
 }  // close unnamed namespace
 
 // CLASS METHODS
@@ -124,17 +140,53 @@ void GuidUtil::generate(unsigned char *result, bsl::size_t numGuids)
     unsigned char *bytes = result;
     unsigned char *end = bytes + numGuids * Guid::k_GUID_NUM_BYTES;
     RandomDevice::getRandomBytesNonBlocking(bytes, end - bytes);
-    while (bytes != end) {
-        typedef unsigned char uc;
-        bytes[6] = uc(0x40 | (bytes[6] & 0x0F));
-        bytes[8] = uc(0x80 | (bytes[8] & 0x3F));
-        bytes += Guid::k_GUID_NUM_BYTES;
-    }
+    makeRfc4122Compliant(bytes, end);
 }
 
 void GuidUtil::generate(Guid *result, bsl::size_t numGuids)
 {
     generate(reinterpret_cast<unsigned char *>(result), numGuids);
+}
+
+Guid GuidUtil::generateNonSecure()
+{
+    Guid result;
+    generateNonSecure(&result);
+    return result;
+}
+
+void GuidUtil::generateNonSecure(unsigned char *result, bsl::size_t numGuids)
+{
+    unsigned char *bytes = result;
+    unsigned char *end   = bytes + numGuids * Guid::k_GUID_NUM_BYTES;
+
+    static bdlb::PcgRandomGenerator *pcgSingletonPtr;
+    BSLMT_ONCE_DO
+    {
+        uint64_t state;
+        if (0 != RandomDevice::getRandomBytes((unsigned char *)&state,
+                                              sizeof(state))) {
+            state = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback state
+        }
+        uint64_t streamSelector = 1u;
+        static bdlb::PcgRandomGenerator pcgSingleton(state, streamSelector);
+        pcgSingletonPtr = &pcgSingleton;
+    }
+    {
+        static bslmt::Mutex            mutex;
+        bslmt::LockGuard<bslmt::Mutex> guard(&mutex);
+        size_t                         numBytesToFill = end - bytes;
+        for (size_t i = 0; i < numBytesToFill; i += sizeof(bsl::uint32_t)) {
+            bsl::uint32_t randomInt = pcgSingletonPtr->generate();
+            memcpy(bytes + i, &randomInt, sizeof(randomInt));
+        }
+    }
+    makeRfc4122Compliant(bytes, end);
+}
+
+void GuidUtil::generateNonSecure(Guid *result, bsl::size_t numGuids)
+{
+    generateNonSecure(reinterpret_cast<unsigned char *>(result), numGuids);
 }
 
 bsls::Types::Uint64 GuidUtil::getLeastSignificantBits(const Guid& guid)

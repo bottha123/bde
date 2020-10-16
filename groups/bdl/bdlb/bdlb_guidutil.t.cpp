@@ -45,6 +45,9 @@ using namespace bsl;
 // [4] bsl::string guidToString(const Guid& guid)
 // [5] Uint64 getMostSignificantBits(const Guid& guid)
 // [6] Uint64 getLeastSignificantBits(const Guid& guid)
+// [8] void generateNonSecure(Guid *out, size_t cnt)
+// [8] void generateNonSecure(unsigned char *result, size_t numGuids)
+// [8] void generateNonSecure()
 // ----------------------------------------------------------------------------
 // [7] USAGE EXAMPLE
 
@@ -295,7 +298,7 @@ int main(int argc, char *argv[])
 
     cout << "TEST " << __FILE__ << " CASE " << test << endl;;
     switch (test)  { case 0:
-      case 7: {
+      case 8: {
         // --------------------------------------------------------------------
         // USAGE EXAMPLE
         //   Extracted from component header file.
@@ -328,6 +331,98 @@ int main(int argc, char *argv[])
         ASSERT(e1 < e2 || e2 < e1);
         ASSERT(e2 < e3 || e3 < e2);
         ASSERT(e1 < e3 || e3 < e1);
+      } break;
+      case 7: {
+        // --------------------------------------------------------------------
+        // TESTING 'generateNonSecure'
+        //
+        // Concerns:
+        //: 1 A single GUID can be passed and loaded.
+        //: 2 If 'count' is passed, 'count' GUIDs are returned.
+        //: 3 The correct type of GUID is returned.
+        //: 4 Memory outside the designated range is left unchanged.
+        //
+        // Plan:
+        //: 1 Call the 'generateNonSecure' method with a count of 1, and call the
+        //:   single-value 'generateNonSecure' method.  (C-1)
+        //:
+        //: 2 Call the 'generateNonSecure' method with different count values.  (C-2)
+        //:
+        //: 3 Check the internal structure of returned GUIDs to verify that
+        //:   they are the right type.  (C-3)
+        //:
+        //: 4 Inspect memory areas just before and after the region that
+        //:   receives GUIDs to verify that it is unchanged.
+        //
+        // Testing:
+        //   void generateNonSecure(Guid *out, size_t cnt)
+        //   void generateNonSecure(unsigned char *out, size_t cnt)
+        //   Guid generateNonSecure()
+        // --------------------------------------------------------------------
+        if (verbose) cout << endl
+                          << "TESTING 'generateNonSecure'" << endl
+                          << "===========================" << endl;
+        enum  { NUM_ITERS = 15 };
+
+        Obj guids[NUM_ITERS + 1]; // one larger to be allow checking bounds.
+        Obj prev_guids[NUM_ITERS + 1];
+        cout << dec;
+        bsl::memset(guids, 0, sizeof(guids));
+        if (veryVerbose) {
+            cout << endl
+                 << "A single GUID can be passed and loaded." << endl
+                 << "---------------------------------------" << endl;
+        }
+        for (bsl::size_t i = 0; i < NUM_ITERS; ++i) {
+            if (i % 3 == 0) {
+                Util::generateNonSecure(&guids[i], 1);
+            }
+            else if (i % 3 == 1) {
+                Util::generateNonSecure(reinterpret_cast<unsigned char*>(&guids[i]), 1);
+            }
+            else if (i % 3 == 2) {
+                guids[i] = Util::generateNonSecure();
+            }
+            prev_guids[i] = guids[i];
+            if (veryVerbose) { P_(i) P(guids[i]); }
+            bsl::size_t j;
+            for (j = 0; j <= i; ++j) {
+                if (veryVeryVerbose) { P_(j) P(guids[j]); }
+                LOOP2_ASSERT(i, j, guids[j]      != Obj());
+                LOOP2_ASSERT(i, j, prev_guids[j] == guids[j]);
+            }
+            for (; j < NUM_ITERS + 1; ++j) {
+                if (veryVeryVerbose) { P_(j) P(guids[j]); }
+                LOOP2_ASSERT(i, j, guids[j] == Obj());
+            }
+        }
+        if (veryVerbose) {
+            cout << endl
+                 << "Get multiple generateNonSecure (PCG) GUIDs." << endl
+                 << "-------------------------------------------" << endl;
+        }
+        for (int i = 0; i < NUM_ITERS; ++i) {
+            bsl::memset(guids, 0, sizeof(guids));
+            if (i & 1) {
+                Util::generateNonSecure(guids, i);
+            }
+            else {
+                Util::generateNonSecure(reinterpret_cast<unsigned char *>(guids), i);
+            }
+            if (veryVerbose)  {
+                int idx = i ? i - 1 : 0;
+                P_(idx) P(guids[idx]);
+            }
+            int j;
+            for (j = 0; j < i; ++j) {
+                if (veryVeryVerbose)  { P_(j) P(guids[j]); }
+                LOOP2_ASSERT(i, j, guids[j] != Obj());
+            }
+            for (; j < NUM_ITERS + 1; ++j) {
+                if (veryVeryVerbose)  { P_(j) P(guids[j]); }
+                LOOP2_ASSERT(i, j, guids[j] == Obj());
+            }
+        }
       } break;
       case 6: {
         // --------------------------------------------------------------------
