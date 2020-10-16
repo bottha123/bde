@@ -15,10 +15,10 @@ BSLS_IDENT("$Id: $")
 //@DESCRIPTION: This component provides a single class,
 // 'bdlb::PcgRandomGenerator', that is used to generate random numbers
 // employing the PCG algorithm, a high-performance, high-quality RNG.  PCG
-// stands for "permuted congruential generator." For details of the algorithm,
-// see http://www.pcg-random.org.  The PCG technique employs the concepts of
-// permutation functions on tuples and a base linear congruential generator.
-// The PCG algorithm is seeded with two values: its initial state and a "stream
+// stands for "permuted congruential generator" (see http://www.pcg-random.org
+// for details).  The PCG technique employs the concepts of permutation
+// functions on tuples and a base linear congruential generator.  The PCG
+// algorithm is seeded with two values: its initial state and a "stream
 // selector."  Stream selector is intended to address a potential hazard of
 // multiple instances of a random number generator having unintended
 // correlation between their outputs.  For example, if we allow them to have
@@ -129,36 +129,50 @@ BSLS_IDENT("$Id: $")
 //     assert(d2 == d1);
 // }
 //..
-///Example 2: Generating unique random sequences of 32-bit numbers
-///- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// This example shows how one might construct two sequences of random numbers
-// that are guaranteed to be unique.  The PcgRandomGenerator constructor takes
-// two 64-bit constants (the initial state, and the sequence selector).
-// Instances of 'PcgRandomGenerator' with the same initial state but different
-// sequence selectors will never have random sequences that coincide.  In order
-// to obtain nondeterministic output for each instance, on a Unix system random
-// bytes can be obtained from '/dev/urandom'.  The component bdlb_randomdevice
-// provides such functionality.  Also illustrated below is a fallback mechanism
-// for obtaining random bytes.  By choosing different values for the sequence
-// selector, one can generate uncorrelated random sequences.
+///Example 2: Using stream selector to guarantee uncorrelated sequences
+/// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// This example illustrates how the stream selector can be used to guarantee
+// that two distinct instances of 'PCGRandomGenerator' produce uncorrelated
+// sequences.
+//
+// First, we use the 'RandomDevice' to choose the initial states for the
+// generators using a source of true randomness:
 //..
-// uint64_t state;
-// if (0 != RandomDevice::getRandomBytes((unsigned char *)&state,
-//                                                        sizeof(state))) {
-//         state = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback state
-// }
-// uint64_t sequenceSelector1 = 1u; 
-// uint64_t sequenceSelector2 = 3u; // choose a different sequence selector
+//  uint64_t state1;
+//  int rc = bdlb::RandomDevice::getRandomBytes(
+//      reinterpret_cast<unsigned char *>(&state1), sizeof(state1));
+//  (void)rc;  // error handling omitted
 //
-// bdlb::PcgRandomGenerator  rng1(state, sequenceSelector1);
-// bdlb::PcgRandomGenerator  rng2(state, sequenceSelector2);
+//  uint64_t state2;
+//  int rc = bdlb::RandomDevice::getRandomBytes(
+//      reinterpret_cast<unsigned char *>(&state2), sizeof(state2));
+//  (void)rc;  // error handling omitted
+//..
+// Then we select two distinct stream selectors for the generators, which, due
+// to the PCG algorithmic properties will guarantee that the sequences will be
+// uncorrelated even if the initial state is exactly the same:
+//..
+//  const uint64_t streamSelector1 = 1;
+//  const uint64_t streamSelector2 = 2;
+//..
+// Finally, we initialize the generators with their respective initial states
+// and stream selectors and check that they produce distinct sequences of
+// random numbers.  The check is guaranteed to pass even in the rare, but
+// possible case of 'state1 == state2'.
+//..
+//  bdlb::PcgRandomGenerator rng1(state1, streamSelector1);
+//  bdlb::PcgRandomGenerator rng2(state2, streamSelector2);
 //
-// const int NUM_ITERATIONS = 1000;
+//  const int NUM_VALUES = 1000;
+//  bsl::vector<bsl::uint32_t> sequence1(NUM_VALUES);
+//  bsl::vector<bsl::uint32_t> sequence2(NUM_VALUES);
 //
-// for (int i = 0; i < NUM_ITERATIONS; ++i)
-// {
-//     assert(rng1.generate != rng2.generate());        
-// }
+//  for (int i = 0; i < NUM_VALUES; ++i) {
+//      sequence1[i] = rng1.generate();
+//      sequence2[i] = rng2.generate();
+//  }
+//
+//  assert(sequence1 != sequence2);
 //..
 
 #include <bsl_cstdint.h>
