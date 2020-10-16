@@ -221,8 +221,7 @@ struct GuidUtil {
         // The behavior is undefined unless 'result' refers to a contiguous
         // sequence of at least 'numGuids' Guid objects.  Note that this
         // function generates high quality, albeit not cryptographically
-        // secure, random numbers for GUIDs. This method is typically faster
-        // than generating cryptographically secure GUIDs.
+        // secure, random numbers for GUIDs. 
 
     static void generateNonSecure(unsigned char *result,
                                   bsl::size_t    numGuids = 1);
@@ -235,18 +234,15 @@ struct GuidUtil {
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
         // The behavior is undefined unless 'result' refers to a contiguous
         // sequence of at least 'numGuids' Guid objects.  Note that this
-        // function uses the PCG random engine to generate high quality, albeit
-        // not cryptographically secure, random numbers for GUIDs. This method
-        // is typically faster than generating cryptographically secure GUIDs.
+        // function generates high quality, albeit not cryptographically
+        // secure, random numbers for GUIDs. 
 
     static Guid generateNonSecure();
         // Generate and return a single GUID meeting the RFC 4122 version 4
         // specification, consisting of 122 randomly generated bits, two
         // 'variant' bits set to '10' and four 'version' bits set to '0100'.
-        // Note that this function uses the PCG random engine to generate high
-        // quality, albeit not cryptographically secure, random numbers for
-        // GUIDs. This method is typically faster than generating
-        // cryptographically secure GUIDs.
+        // Note that this function generates high quality, albeit not
+        // cryptographically secure, random numbers for GUIDs.
 
     static int guidFromString(Guid *result, bslstl::StringRef guidString);
         // Parse the specified 'guidString' (in {GUID String Format}) and load

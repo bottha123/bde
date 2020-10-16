@@ -14,19 +14,19 @@ BSLS_IDENT("$Id: $")
 //
 //@DESCRIPTION: This component provides a single class,
 // 'bdlb::PcgRandomGenerator', that is used to generate random numbers
-// employing the PCG algorithm, a high-performance, high-quality RNG.  The PCG
-// technique employs the concepts of permutation functions on tuples and a base
-// linear congruential generator. In the PCG algorithm, rather than a single
-// seed parameter, there are two parameters, 'initState' and 'streamSelector'.
-// The use of a second parameter ('streamSelector') is to address a potential
-// hazard when multiple instances of a random number generator are used: an
-// unintended correlation between their outputs.  For example, if we allow them
-// to have the same internal state (e.g.  mistakenly seeding them with the
-// current time in seconds), they will output the exact same sequence of
-// numbers.  Employing a 'streamSelector' enables the the same 'initState' to
-// generate unique sequences.  Please refer to O’Neill (2014) at
-// https://www.pcg-random.org/pdf/hmc-cs-2014-0905.pdf for further details of
-// the algorithm.
+// employing the PCG algorithm, a high-performance, high-quality RNG.  PCG
+// stands for "permuted congruential generator." For details of the algorithm,
+// see http://www.pcg-random.org.  The PCG technique employs the concepts of
+// permutation functions on tuples and a base linear congruential generator.
+// The PCG algorithm is seeded with two values: its initial state and a "stream
+// selector."  Stream selector is intended to address a potential hazard of
+// multiple instances of a random number generator having unintended
+// correlation between their outputs.  For example, if we allow them to have
+// the same internal state (e.g.  mistakenly seeding them with the current time
+// in seconds), they will output the exact same sequence of numbers.  Employing
+// a 'streamSelector' enables the the same 'initState' to generate unique
+// sequences.  Please refer to O’Neill (2014) at
+// https://www.pcg-random.org/pdf/hmc-cs-2014-0905.pdf for details.
 //
 //
 ///Usage
@@ -129,29 +129,32 @@ BSLS_IDENT("$Id: $")
 //     assert(d2 == d1);
 // }
 //..
-///Example 2: Generating a random 32-bit number
-///- - - - - - - - - - - - - - - - - - - - - - -
-// The PcgRandomGenerator constructor takes two 64-bit constants (the initial
-// state, and the rng sequence selector.  Instances of 'PcgRandomGenerator' with
-// different sequence selectors will never have random sequences that coincide.
-// In order to obtain nondeterministic output for each instance, on a Unix
-// system random bytes can be obtained from '/dev/urandom'.  The component 
-// bdlb_randomdevice provides such functionality.  Also illustrated below is a 
-// a backup mechanism for obtaining random bytes.
+///Example 2: Generating unique random sequences of 32-bit numbers
+///- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+// This example shows how one might construct two sequences of random numbers
+// that are guaranteed to be unique.  The PcgRandomGenerator constructor takes
+// two 64-bit constants (the initial state, and the sequence selector).
+// Instances of 'PcgRandomGenerator' with the same initial state but different
+// sequence selectors will never have random sequences that coincide.  In order
+// to obtain nondeterministic output for each instance, on a Unix system random
+// bytes can be obtained from '/dev/urandom'.  The component bdlb_randomdevice
+// provides such functionality.  Also illustrated below is a fallback mechanism
+// for obtaining random bytes. By choosing different values for the sequence
+// selector, one can generate uncorrelated random sequences.
 //..
 //  uint64_t state;
 //  if (0 != RandomDevice::getRandomBytes((unsigned char *)&state,
 //                                                         sizeof(state))) {
 //          state = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback state
 //  }
-//  uint64_t streamSelector;
-//  if (0 != RandomDevice::getRandomBytes((unsigned char *)&streamSelector,
-//                                              sizeof(streamSelector))) {
-//           streamSelector = time(NULL) ^
-//                   (intptr_t)&bsl::printf;  // fallback streamSelector
-//  }
-//  bdlb::PcgRandomGenerator  rng(state, streamSelector);
-//  bsl::uint32_t randomInt = rng.generate();
+//  uint64_t sequenceSelector1 = 1u; 
+//  uint64_t sequenceSelector2 = 3u; // choose a different sequence selector
+//
+//  bdlb::PcgRandomGenerator  rng1(state, sequenceSelector1);
+//  bdlb::PcgRandomGenerator  rng2(state, sequenceSelector2);
+//
+//  bsl::uint32_t randomInt1 = rng1.generate();
+//  bsl::uint32_t randomInt2 = rng2.generate();
 //..
 
 #include <bsl_cstdint.h>
@@ -164,10 +167,7 @@ namespace bdlb {
                                  // ========================
 class PcgRandomGenerator {
     // This class implements a random number generator (RNG) based on the PCG
-    // algorithm.  PCG stands for "permuted congruential generator." The state
-    // is 64 bits.  It uses a so-called stream selector, also 64 bits. For
-    // details, please refer below to the constructor.  For details of the
-    // algorithm, see http://www.pcg-random.org.
+    // algorithm.  
 
   private:
     // DATA
@@ -184,17 +184,16 @@ class PcgRandomGenerator {
     PcgRandomGenerator(bsl::uint64_t initState      = 0,
                        bsl::uint64_t streamSelector = 1);
         // Create a 'PcgRandomGenerator' object and seed it with the optionally
-        // specified 'initState' and 'streamSelector.'  If 'initState' is not
+        // specified 'initState' and 'streamSelector'.  If 'initState' is not
         // specified, 0 is used as the initial state.  If 'streamSelector' is
         // not specified, 1 is used as the stream selector. 'initState' is the
         // starting state for the RNG.  Any 64-bit value may be passed.
         // 'streamSelector' selects the output sequence for the RNG.  Any
         // 64-bit value may be passed, although only the low 63 bits are
-        // significant.  There are 2^63 different RNGs available, and
-        // 'streamSelector' selects from among them.  Invoking different
-        // instances with the identical 'initState' and 'streamSelector' will
-        // result in the same sequence of random numbers from subsequent
-        // invocations of generate(). 
+        // significant.  Note that invoking different instances with the
+        // identical 'initState' and 'streamSelector' will result in the same
+        // sequence of random numbers from subsequent invocations of
+        // 'generate()'.
 
     //! PcgRandomGenerator(const PcgRandomGenerator& original) = default;
         // Create a 'PcgRandomGenerator' object having the same state as the
