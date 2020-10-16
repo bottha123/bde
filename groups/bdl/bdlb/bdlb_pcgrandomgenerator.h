@@ -139,22 +139,26 @@ BSLS_IDENT("$Id: $")
 // to obtain nondeterministic output for each instance, on a Unix system random
 // bytes can be obtained from '/dev/urandom'.  The component bdlb_randomdevice
 // provides such functionality.  Also illustrated below is a fallback mechanism
-// for obtaining random bytes. By choosing different values for the sequence
+// for obtaining random bytes.  By choosing different values for the sequence
 // selector, one can generate uncorrelated random sequences.
 //..
-//  uint64_t state;
-//  if (0 != RandomDevice::getRandomBytes((unsigned char *)&state,
-//                                                         sizeof(state))) {
-//          state = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback state
-//  }
-//  uint64_t sequenceSelector1 = 1u; 
-//  uint64_t sequenceSelector2 = 3u; // choose a different sequence selector
+// uint64_t state;
+// if (0 != RandomDevice::getRandomBytes((unsigned char *)&state,
+//                                                        sizeof(state))) {
+//         state = time(NULL) ^ (intptr_t)&bsl::printf;  // fallback state
+// }
+// uint64_t sequenceSelector1 = 1u; 
+// uint64_t sequenceSelector2 = 3u; // choose a different sequence selector
 //
-//  bdlb::PcgRandomGenerator  rng1(state, sequenceSelector1);
-//  bdlb::PcgRandomGenerator  rng2(state, sequenceSelector2);
+// bdlb::PcgRandomGenerator  rng1(state, sequenceSelector1);
+// bdlb::PcgRandomGenerator  rng2(state, sequenceSelector2);
 //
-//  bsl::uint32_t randomInt1 = rng1.generate();
-//  bsl::uint32_t randomInt2 = rng2.generate();
+// const int NUM_ITERATIONS = 1000;
+//
+// for (int i = 0; i < NUM_ITERATIONS; ++i)
+// {
+//     assert(rng1.generate != rng2.generate());        
+// }
 //..
 
 #include <bsl_cstdint.h>
@@ -186,14 +190,11 @@ class PcgRandomGenerator {
         // Create a 'PcgRandomGenerator' object and seed it with the optionally
         // specified 'initState' and 'streamSelector'.  If 'initState' is not
         // specified, 0 is used as the initial state.  If 'streamSelector' is
-        // not specified, 1 is used as the stream selector. 'initState' is the
-        // starting state for the RNG.  Any 64-bit value may be passed.
-        // 'streamSelector' selects the output sequence for the RNG.  Any
-        // 64-bit value may be passed, although only the low 63 bits are
-        // significant.  Note that invoking different instances with the
-        // identical 'initState' and 'streamSelector' will result in the same
-        // sequence of random numbers from subsequent invocations of
-        // 'generate()'.
+        // not specified, 1 is used as the stream selector. Only the low 63
+        // bits of the 'streamSelector' are significant.  Note that invoking
+        // different instances with the identical 'initState' and
+        // 'streamSelector' will result in the same sequence of random numbers
+        // from subsequent invocations of 'generate()'.
 
     //! PcgRandomGenerator(const PcgRandomGenerator& original) = default;
         // Create a 'PcgRandomGenerator' object having the same state as the

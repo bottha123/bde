@@ -220,8 +220,7 @@ int main(int argc, char *argv[])
       case 3: {
         // --------------------------------------------------------------------
         // USAGE EXAMPLE
-        //   Extracted from component header file. For 'generatePcg' (PCG)
-        //   usage example please refer bdlb_pcgrandomgenerator.t.cpp.
+        //   Extracted from component header file. 
         //
         // Concerns:
         //: 1 The usage example provided in the component header file compiles,

@@ -48,9 +48,9 @@ BSLS_IDENT("$Id: $")
 ///Cryptographic Security:
 ///-----------------------
 // 'GuidUtil' provides two families of functions for generating GUIDs:
-// 'generate' and 'generateNonSecure'. The primary difference between them is
-// cryptographic security of the resulting GUIDs and performance. The slower
-// 'generate' methods aim to produce cryptographically secure GUIDs by
+// 'generate' and 'generateNonSecure'.  The primary difference between them is
+// the cryptographic security of the resulting GUIDs and performance.  The
+// slower 'generate' methods aim to produce cryptographically secure GUIDs by
 // accessing the underlying system resources to obtain truly random numbers,
 // whereas the faster 'generateNonSecure' methods use a fast high-quality (but
 // not strictly cryptographically secure) in-process random-number generator.
