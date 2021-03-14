@@ -63,6 +63,8 @@ bsls_performancehint
 bsls_platform
 bsls_platformutil
 bsls_pointercastutil
+bsls_pre
+bsls_precheck
 bsls_protocoltest
 bsls_review
 bsls_review_macroreset

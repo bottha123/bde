@@ -25,6 +25,9 @@
 #include <bsl_iostream.h>
 #include <bsl_sstream.h>
 
+#include <bsls_precheck.h>  // only include if fuzzing is enabled
+#include <bsls_pre.h>
+
 using namespace BloombergLP;
 using namespace bsl;
 
@@ -331,6 +334,65 @@ const AltDataRow ALT_DATA[] =
 #endif
 };
 const int ALT_NUM_DATA = static_cast<int>(sizeof ALT_DATA / sizeof *ALT_DATA);
+
+
+#ifdef BDE_ACTIVATE_FUZZ_TESTING
+#define main test_driver_main
+#endif
+
+void func2(int input)
+{
+    BSLS_ASSERT(input > 100);
+    BSLS_PRE_DONE();
+
+}
+
+void func1(int input)
+{
+    BSLS_ASSERT(input > 100);
+    BSLS_PRE_DONE();
+
+    func2( input );
+}
+
+
+extern "C"
+int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+    // Use the specified 'data' array of 'size' bytes as input to methods of
+    // this component and return zero.
+ {
+    const char *FUZZ   = reinterpret_cast<const char *>(data);
+    if (size < (sizeof(char) + (3*sizeof(int)))) {
+        return 0;
+    }
+
+
+    const int *year = reinterpret_cast<const int*>(FUZZ);
+    const int *month = reinterpret_cast<const int*>(FUZZ + sizeof(int));
+    const int *day = reinterpret_cast<const int*>(FUZZ + sizeof(int) + sizeof(int));
+    bool result = false;
+
+    BSLS_PRECHECK( func1(*year); );
+
+/*
+    BSLS_PRECHECK( result = bdlt::Date::isValidYearMonthDay(*year, *month, *day);
+
+    if ((*year < 1) || (*year > 9999)) {
+        BSLS_ASSERT(!result);
+    }
+
+    if ((*month < 1) || (*month > 12)) {
+        BSLS_ASSERT(!result);
+    }
+
+    if ((*day < 1) || (*day > 31)) {
+        BSLS_ASSERT(!result);
+    }
+    );
+*/
+    return 0;
+}
+
 
 // ============================================================================
 //                              MAIN PROGRAM
