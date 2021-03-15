@@ -342,6 +342,8 @@ const int ALT_NUM_DATA = static_cast<int>(sizeof ALT_DATA / sizeof *ALT_DATA);
 
 void func2(int input)
 {
+    // if input is 'narrower' than func1, we want to know
+    // e.g. change precondition from '>100' to '>1000'
     BSLS_ASSERT(input > 100);
     BSLS_PRE_DONE();
 
@@ -373,6 +375,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     bool result = false;
 
     BSLS_PRECHECK( func1(*year); );
+    
 
 /*
     BSLS_PRECHECK( result = bdlt::Date::isValidYearMonthDay(*year, *month, *day);

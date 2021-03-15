@@ -38,20 +38,11 @@
 //    d_serialDate = SerialDateImpUtil::ymdToSerial(year, month, day);
 //  }
 
-/* - set up the Done handler in a similar way we set up the AssertHandler
-	- this is what the BSLS_PRE_DONE macro will call when it's enabled
-	- another guard that sets the PreDoneHandler to PreCheck::preDoneHandler
-		- the preDoneHandler sets the flag to indicate that PRE_DONE was called */
-
 #define FUZZING_ENABLED
 
 #ifdef FUZZING_ENABLED
 
 #include <bsls_precheck.h>
-
-// alternative to invoking setFlagToFalse():
-//   - define a new type (conceptually like assert/review/predone)
-//   - trigger the type
 
 #define BSLS_PRE_DONE() PreCheck::setFlagToFalse();
 
@@ -60,7 +51,3 @@
 #define BSLS_PRE_DONE()
 
 #endif
-
-
-
-//void installDoneHandler(bsl::function<??> );

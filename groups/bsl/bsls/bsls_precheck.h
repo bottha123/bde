@@ -80,7 +80,7 @@ class FuzzTestPreconditionFailedException : public std::exception {
         X;                                                                   \
     } catch (FuzzTestPreconditionFailedException& ex) {                      \
         PreCheck::checkException(ex);                                        \
-    }                                                                        \
+    }                                                                        
 
 
 struct PreCheck {
@@ -100,7 +100,6 @@ struct PreCheck {
         d_checking = true;
     }
 
-    //(*ViolationHandler)(const AssertViolation&);
    static void assertViolationHandler(const BloombergLP::bsls::AssertViolation& av)
         // If "checking preconditions" is true, throw an AssertTestException ...If
         // "checking preconditions" is false, std::abort()
@@ -110,7 +109,6 @@ struct PreCheck {
         else
         {
             BloombergLP::bsls::Assert::failByAbort(av);
-            //std::abort(); //
         }
     }
 
