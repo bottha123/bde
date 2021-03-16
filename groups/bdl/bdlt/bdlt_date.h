@@ -222,6 +222,8 @@ BSLS_IDENT("$Id: $")
 #include <bsls_assert.h>
 #include <bsls_review.h>
 
+#include <bsls_pre.h> // fuzz testing
+
 #include <bsl_iosfwd.h>
 
 
@@ -810,6 +812,7 @@ inline
 void Date::setYearMonthDay(int year, int month, int day)
 {
     BSLS_ASSERT_SAFE(isValidYearMonthDay(year, month, day));
+    BSLS_PRE_DONE(); 
 
     d_serialDate = SerialDateImpUtil::ymdToSerial(year, month, day);
 }

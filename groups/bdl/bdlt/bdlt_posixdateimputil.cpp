@@ -4,6 +4,9 @@
 #include <bsls_ident.h>
 BSLS_IDENT_RCSID(bdlt_posixdateimputil_cpp,"$Id$ $CSID$")
 
+
+#include <bsls_pre.h> // fuzz testing
+
 namespace BloombergLP {
 namespace bdlt {
 
@@ -260,6 +263,9 @@ int PosixDateImpUtil::ydToSerial(int year, int dayOfYear)
 int PosixDateImpUtil::ymdToSerial(int year, int month, int day)
 {
     BSLS_ASSERT(isValidYearMonthDay(year, month, day));
+
+    //BSLS_ASSERT(year != 1750);     
+    BSLS_PRE_DONE();
 
     if (s_firstCachedYear <= year && year <= s_lastCachedYear) {
         return s_cachedSerialDate[year - s_firstCachedYear][month] + day;

@@ -66,10 +66,12 @@ BSLS_IDENT("$Id: $")
 #include <bsls_review.h>
 #include <exception>
 #include <cstdlib>
+#include <bsls_pre.h>
+
+//#include <bsl_iostream.h>
+#include <iostream>
 
 class FuzzTestPreconditionFailedException : public std::exception {
-
-
 };
 
 
@@ -80,8 +82,9 @@ class FuzzTestPreconditionFailedException : public std::exception {
         X;                                                                   \
     } catch (FuzzTestPreconditionFailedException& ex) {                      \
         PreCheck::checkException(ex);                                        \
-    }                                                                        
+    }                                                                        \
 
+static int g_numberOfTests = 0;
 
 struct PreCheck {
 
@@ -105,14 +108,21 @@ struct PreCheck {
         // "checking preconditions" is false, std::abort()
     {
         if (d_checking)
+        {
+            ++g_numberOfTests;
+            if (0 == g_numberOfTests % 10000) {
+                std::cerr <<  "# tests: " << g_numberOfTests << std::endl;
+            }
+            
             throw FuzzTestPreconditionFailedException(); // prior to PRE_DONE, an assertion was triggered
+        }
         else
         {
             BloombergLP::bsls::Assert::failByAbort(av);
         }
     }
 
-    static void preDoneHandler(...)
+    static void preDoneHandler( const BloombergLP::bsls::AssertViolation& )
         // Set the "checking preconditions" flag to false.  Eventually:
         // Validate that this is called where expected.  This requires a
         // best-effort attempt to identify the source, and we will eventually
@@ -142,7 +152,7 @@ class FuzzTestHandlerGuard {
     // DATA
     BloombergLP::bsls::AssertFailureHandlerGuard d_assertGuard;
     //ReviewFailureHandlerGuard d_reviewGuard;
-    // function pointer       d_preDoneHandlerGuard;
+    //BloombergLP::bsls::AssertFailureHandlerGuard d_preDoneHandlerGuard;
 
   public:
     // CREATORS
@@ -158,7 +168,7 @@ FuzzTestHandlerGuard::FuzzTestHandlerGuard()
 : d_assertGuard(&PreCheck::assertViolationHandler)
 //, d_reviewGuard(&AssertTest::failTestDriverByReview)
 {
-    //d_preDoneHandlerGuard = PreCheck::preDoneHandler();
+    PreDoneHandler::installHandler(&PreCheck::preDoneHandler);
 }
 
 #endif

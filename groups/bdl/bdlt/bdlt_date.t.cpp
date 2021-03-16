@@ -351,7 +351,7 @@ void func2(int input)
 
 void func1(int input)
 {
-    BSLS_ASSERT(input > 100);
+    BSLS_ASSERT(input > 1);
     BSLS_PRE_DONE();
 
     func2( input );
@@ -368,18 +368,17 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
         return 0;
     }
 
-
     const int *year = reinterpret_cast<const int*>(FUZZ);
     const int *month = reinterpret_cast<const int*>(FUZZ + sizeof(int));
     const int *day = reinterpret_cast<const int*>(FUZZ + sizeof(int) + sizeof(int));
     bool result = false;
 
-    BSLS_PRECHECK( func1(*year); );
-    
+    // BSLS_PRECHECK( func1(*year); );
+    // BSLS_PRECHECK( result = bdlt::Date::isValidYearMonthDay(*year, *month, *day);
+    bdlt::Date d1;
+    BSLS_PRECHECK( d1.setYearMonthDay(*year, *month, *day); );
 
 /*
-    BSLS_PRECHECK( result = bdlt::Date::isValidYearMonthDay(*year, *month, *day);
-
     if ((*year < 1) || (*year > 9999)) {
         BSLS_ASSERT(!result);
     }
