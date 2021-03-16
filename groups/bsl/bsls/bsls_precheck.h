@@ -47,18 +47,11 @@ BSLS_IDENT("$Id: $")
 //    const int *day = reinterpret_cast<const
 //    int*>(FUZZ + sizeof(int) + sizeof(int));
 //
-//    BSLS_PRECHECK( Date d(year,month,day); );
-/*       sethandlers();
-      try {
-        PreCheck::initStaticState(__FILE__,__LINE__);
-        Date d(year,month,day);
-      } catch (bsls::AssertTestException& ex) {
-	    PreCheck::checkException(ex);
-      }      */
-// }
+//    bdlt::Date d1;
+//    BSLS_PRECHECK( d1.setYearMonthDay(*year, *month, *day); );
 //..
 // Functions with narrow contracts that are to be tested should be decorated
-// with the companion macro, BSLS_PRE_DONE, after the function preconditions
+// with the macro, BSLS_PRE_DONE, after the function preconditions
 // have been checked.
 //
 
@@ -111,7 +104,7 @@ struct PreCheck {
         {
             ++g_numberOfTests;
             if (0 == g_numberOfTests % 10000) {
-                std::cerr <<  "# tests: " << g_numberOfTests << std::endl;
+                std::cerr <<  "   # exceptions caught: " << g_numberOfTests << std::endl;
             }
             
             throw FuzzTestPreconditionFailedException(); // prior to PRE_DONE, an assertion was triggered
@@ -139,11 +132,6 @@ struct PreCheck {
         // refactor out of bsls_asserttest.
     {
 
-    }
-
-    static void setFlagToFalse()
-    {
-        d_checking = false;
     }
 };
 
