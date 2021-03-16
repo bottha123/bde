@@ -25,10 +25,6 @@ BSLS_IDENT("$Id: $")
 // that will expand to nothing in most builds. When fuzzing is enabled,
 // BSLS_PRE_DONE_ENABLED should be defined, else undefined.
 //
-// When enabled (i.e. BSLS_PRE_DONE_ENABLED is defined), BSLS_PRE_DONE
-// calls a dynamic handler function similar to how BSLS_ASSERT calls
-// Assert::invokeHandler. This passes the file and line number where the
-// BSLS_PRE_DONE was invoked.
 //
 ///Usage
 ///-----
