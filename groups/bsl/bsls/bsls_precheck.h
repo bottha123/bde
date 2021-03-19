@@ -85,8 +85,7 @@ struct PreCheck {
   private:
     static const char *d_file;
     static int         d_line;
-    static bool        d_checking;
-    static BloombergLP::bsls::AtomicBool d_ab_checking;
+    static AtomicBool  d_ab_checking;
 
   public:
 
@@ -95,24 +94,23 @@ struct PreCheck {
     {
         d_file     = fileName;
         d_line     = lineNumber;
-        //d_checking = true;
         d_ab_checking.store(true);
-        // d_ab_checking = true;
     }
 
-   static void assertViolationHandler(const BloombergLP::bsls::AssertViolation& av)
-        // If "checking preconditions" is true, throw an AssertTestException ...If
-        // "checking preconditions" is false, std::abort()
+    static void assertViolationHandler(const AssertViolation &av)
+    // If "checking preconditions" is true, throw an AssertTestException ...If
+    // "checking preconditions" is false, std::abort()
     {
-        //if (d_checking)
         if (d_ab_checking.load())
         {
             ++g_numberOfExceptions;
-            if (0 == g_numberOfExceptions % 10000) {
-                std::cerr <<  "   # exceptions caught: " << g_numberOfExceptions << std::endl;
+            if (0 == g_numberOfExceptions % 10000)
+            {
+                std::cerr << "   # exceptions caught: " 
+                          << g_numberOfExceptions << std::endl;
             }
-            
-            throw FuzzTestPreconditionFailedException(); // prior to PRE_DONE, an assertion was triggered
+            // prior to PRE_DONE, an assertion was triggered
+            throw FuzzTestPreconditionFailedException();
         }
         else
         {
@@ -128,7 +126,6 @@ struct PreCheck {
         // catch the "my precondition check violated the precondition of a
         // different function" case.
     {
-        d_checking = false;
         d_ab_checking.store(false);
     }
 

@@ -9,10 +9,9 @@ BSLS_IDENT("$Id$ $CSID$")
 namespace BloombergLP {
 namespace bsls {
 
-const char *PreCheck::d_file     = "";
-int         PreCheck::d_line     = -1;
-bool        PreCheck::d_checking = false;
-BloombergLP::bsls::AtomicBool PreCheck::d_ab_checking = false;
+const char *PreCheck::d_file        = "";
+int         PreCheck::d_line        = -1;
+AtomicBool  PreCheck::d_ab_checking = false;
 
 
 }  // close package namespace
