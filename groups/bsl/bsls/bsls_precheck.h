@@ -53,6 +53,8 @@ BSLS_IDENT("$Id: $")
 
 #include <bsls_assert.h>
 #include <bsls_review.h>
+#include <bsls_atomic.h>
+
 #include <exception>
 #include <cstdlib>
 #include <bsls_pre.h>
@@ -60,20 +62,23 @@ BSLS_IDENT("$Id: $")
 //#include <bsl_iostream.h>
 #include <iostream>
 
+namespace BloombergLP {
+namespace bsls {
+
 class FuzzTestPreconditionFailedException : public std::exception {
 };
 
 
 #define BSLS_PRECHECK(X)                                                     \
-    FuzzTestHandlerGuard hG;                                                 \
+    BloombergLP::bsls::FuzzTestHandlerGuard hG;                              \
     try {                                                                    \
-        PreCheck::initStaticState(__FILE__,__LINE__);                        \
+        BloombergLP::bsls::PreCheck::initStaticState(__FILE__,__LINE__);     \
         X;                                                                   \
-    } catch (FuzzTestPreconditionFailedException& ex) {                      \
-        PreCheck::checkException(ex);                                        \
+    } catch (BloombergLP::bsls::FuzzTestPreconditionFailedException& ex) {   \
+        BloombergLP::bsls::PreCheck::checkException(ex);                     \
     }                                                                        \
 
-static int g_numberOfTests = 0;
+static int g_numberOfExceptions = 0;
 
 struct PreCheck {
 
@@ -81,6 +86,7 @@ struct PreCheck {
     static const char *d_file;
     static int         d_line;
     static bool        d_checking;
+    static BloombergLP::bsls::AtomicBool d_ab_checking;
 
   public:
 
@@ -89,18 +95,21 @@ struct PreCheck {
     {
         d_file     = fileName;
         d_line     = lineNumber;
-        d_checking = true;
+        //d_checking = true;
+        d_ab_checking.store(true);
+        // d_ab_checking = true;
     }
 
    static void assertViolationHandler(const BloombergLP::bsls::AssertViolation& av)
         // If "checking preconditions" is true, throw an AssertTestException ...If
         // "checking preconditions" is false, std::abort()
     {
-        if (d_checking)
+        //if (d_checking)
+        if (d_ab_checking.load())
         {
-            ++g_numberOfTests;
-            if (0 == g_numberOfTests % 10000) {
-                std::cerr <<  "   # exceptions caught: " << g_numberOfTests << std::endl;
+            ++g_numberOfExceptions;
+            if (0 == g_numberOfExceptions % 10000) {
+                std::cerr <<  "   # exceptions caught: " << g_numberOfExceptions << std::endl;
             }
             
             throw FuzzTestPreconditionFailedException(); // prior to PRE_DONE, an assertion was triggered
@@ -120,6 +129,7 @@ struct PreCheck {
         // different function" case.
     {
         d_checking = false;
+        d_ab_checking.store(false);
     }
 
     static void checkException(const FuzzTestPreconditionFailedException& )
@@ -150,9 +160,13 @@ class FuzzTestHandlerGuard {
 inline
 FuzzTestHandlerGuard::FuzzTestHandlerGuard()
 : d_assertGuard(&PreCheck::assertViolationHandler)
-//, d_reviewGuard(&AssertTest::failTestDriverByReview)
+//d_reviewGuard(&AssertTest::failTestDriverByReview)
 {
     PreDoneHandler::installHandler(&PreCheck::preDoneHandler);
 }
+
+}  // close package namespace
+}  // close enterprise namespace
+
 
 #endif

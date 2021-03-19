@@ -48,27 +48,36 @@ BSLS_IDENT("$Id: $")
 #ifdef FUZZING_ENABLED
 
 #include <bsls_assert.h>
+#include <bsls_pointercastutil.h>
+
+namespace BloombergLP {
+namespace bsls {
 
 class PreDoneHandler
 {
 	private:
-		static BloombergLP::bsls::Assert::ViolationHandler d_handler;
+	 	static AtomicOperations::AtomicTypes::Pointer  d_handler;
+
+		static Assert::ViolationHandler getPreDoneHandler() {
+			return (Assert::ViolationHandler) AtomicOperations::getPtrAcquire(&d_handler);
+		}
 
 	public:
-		//PreDoneHandler(pointerToFunction handler) {}
-
-		static void installHandler( BloombergLP::bsls::Assert::ViolationHandler handler)
+		static void installHandler(Assert::ViolationHandler handler)
 		{
-			d_handler = handler;
+			AtomicOperations::setPtrRelease(&d_handler, PointerCastUtil::cast<void *>(handler));
 		}
 		static void invokeHandler()
 		{
-			BloombergLP::bsls::AssertViolation av("preDone", __FILE__, __LINE__, "");
-			d_handler(av);
+			AssertViolation av("preDone", __FILE__, __LINE__, "");
+					
+			Assert::ViolationHandler preDoneHandlerPtr = getPreDoneHandler();
+
+			preDoneHandlerPtr(av);
 		}
 };
 
-#define BSLS_PRE_DONE() PreDoneHandler::invokeHandler();
+#define BSLS_PRE_DONE() bsls::PreDoneHandler::invokeHandler();
 
 
 #else // fuzzing disabled
@@ -76,5 +85,8 @@ class PreDoneHandler
 #define BSLS_PRE_DONE()
 
 #endif
+
+}  // close package namespace
+}  // close enterprise namespace
 
 #endif

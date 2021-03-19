@@ -357,7 +357,6 @@ void func1(int input)
     func2( input );
 }
 
-
 extern "C"
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     // Use the specified 'data' array of 'size' bytes as input to methods of

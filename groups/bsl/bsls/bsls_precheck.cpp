@@ -6,12 +6,18 @@ BSLS_IDENT("$Id$ $CSID$")
 
 #include <bsls_bsltestutil.h>        // for testing only
 
+namespace BloombergLP {
+namespace bsls {
+
 const char *PreCheck::d_file     = "";
 int         PreCheck::d_line     = -1;
 bool        PreCheck::d_checking = false;
+BloombergLP::bsls::AtomicBool PreCheck::d_ab_checking = false;
 
-namespace BloombergLP {
+
+}  // close package namespace
 }  // close enterprise namespace
+
 
 // ----------------------------------------------------------------------------
 // Copyright 2021 Bloomberg Finance L.P.

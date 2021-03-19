@@ -6,9 +6,13 @@ BSLS_IDENT("$Id$ $CSID$")
 
 #include <bsls_bsltestutil.h>        // for testing only
 
-BloombergLP::bsls::Assert::ViolationHandler PreDoneHandler::d_handler = NULL;
-
 namespace BloombergLP {
+namespace bsls {
+
+AtomicOperations::AtomicTypes::Pointer
+   PreDoneHandler::d_handler = {(void *) &Assert::failByAbort};
+
+}  // close package namespace
 }  // close enterprise namespace
 
 // ----------------------------------------------------------------------------
