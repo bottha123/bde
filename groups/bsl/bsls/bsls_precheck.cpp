@@ -11,7 +11,7 @@ namespace bsls {
 
 const char *PreCheck::d_file        = "";
 int         PreCheck::d_line        = -1;
-AtomicBool  PreCheck::d_ab_checking = false;
+AtomicBool  PreCheck::d_checking = false;
 
 
 }  // close package namespace

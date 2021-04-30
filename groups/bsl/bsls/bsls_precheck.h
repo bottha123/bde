@@ -66,6 +66,18 @@ namespace BloombergLP {
 namespace bsls {
 
 class FuzzTestPreconditionFailedException : public std::exception {
+    private:
+    //std::string d_filename;
+    const char* d_filename;
+
+    public:
+    FuzzTestPreconditionFailedException( const char* filename)
+    : d_filename(filename) {}
+    
+    const char* filename()
+    {
+        return d_filename;
+    }
 };
 
 
@@ -78,6 +90,10 @@ class FuzzTestPreconditionFailedException : public std::exception {
         BloombergLP::bsls::PreCheck::checkException(ex);                     \
     }                                                                        \
 
+
+
+#define IS_POWER_OF_TWO(X) (0 == ((X) & ((X) - 1)))
+
 static int g_numberOfExceptions = 0;
 
 struct PreCheck {
@@ -85,7 +101,7 @@ struct PreCheck {
   private:
     static const char *d_file;
     static int         d_line;
-    static AtomicBool  d_ab_checking;
+    static AtomicBool  d_checking;
 
   public:
 
@@ -94,23 +110,24 @@ struct PreCheck {
     {
         d_file     = fileName;
         d_line     = lineNumber;
-        d_ab_checking.store(true);
+        d_checking.store(true);
     }
 
     static void assertViolationHandler(const AssertViolation &av)
     // If "checking preconditions" is true, throw an AssertTestException ...If
     // "checking preconditions" is false, std::abort()
     {
-        if (d_ab_checking.load())
+        if (d_checking.load())
         {
             ++g_numberOfExceptions;
-            if (0 == g_numberOfExceptions % 10000)
+            //if (0 == g_numberOfExceptions % 10000)
+            if (IS_POWER_OF_TWO(g_numberOfExceptions))
             {
                 std::cerr << "   # exceptions caught: " 
                           << g_numberOfExceptions << std::endl;
             }
             // prior to PRE_DONE, an assertion was triggered
-            throw FuzzTestPreconditionFailedException();
+            throw FuzzTestPreconditionFailedException(av.fileName());
         }
         else
         {
@@ -125,15 +142,27 @@ struct PreCheck {
         // want to refactor this logic out of bsls_asserttest.  This will be to
         // catch the "my precondition check violated the precondition of a
         // different function" case.
+        // 
+        /*
+            void narrowfunc1(int i){
+                BSLS_ASSERT( X().capacity() > i);
+                BSLS_ASSERT(i > 0);
+                BSLS_PREDONE();
+                g();
+            }
+        */
+       // HJB: see bsls_asserttest::catchProbe()
     {
-        d_ab_checking.store(false);
+        d_checking.store(false);
     }
 
-    static void checkException(const FuzzTestPreconditionFailedException& )
+    static void checkException(const FuzzTestPreconditionFailedException& ex)
         // Eventually: Verify that exception came from the expected component.
         // This requires the same logic as preDoneHandler which we will want to
         // refactor out of bsls_asserttest.
     {
+        //std::string filename = ex.filename();
+        // 
 
     }
 };

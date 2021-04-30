@@ -342,6 +342,7 @@ const int ALT_NUM_DATA = static_cast<int>(sizeof ALT_DATA / sizeof *ALT_DATA);
 
 void func2(int input)
 {
+    // Example narrow function; called by another narrow function
     // if input is 'narrower' than func1, we want to know
     // e.g. change precondition from '>100' to '>1000'
     BSLS_ASSERT(input > 100);
@@ -351,8 +352,12 @@ void func2(int input)
 
 void func1(int input)
 {
+    // Example narrow function; checks preconditions and calls another
+    // narrow function
     BSLS_ASSERT(input > 1);
     BSLS_PRE_DONE();
+
+    // more stuff ...
 
     func2( input );
 }
@@ -372,11 +377,13 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     const int *day = reinterpret_cast<const int*>(FUZZ + sizeof(int) + sizeof(int));
     // bool result = false;
 
-    // BSLS_PRECHECK( func1(*year); );
+    BSLS_PRECHECK( func1(*year); );
     // BSLS_PRECHECK( result = bdlt::Date::isValidYearMonthDay(*year, *month, *day);
+    
     bdlt::Date d1;
     BSLS_PRECHECK( d1.setYearMonthDay(*year, *month, *day); );
 
+    // If desired, can check the correctness:
 /*
     if ((*year < 1) || (*year > 9999)) {
         BSLS_ASSERT(!result);

@@ -43,9 +43,9 @@ BSLS_IDENT("$Id: $")
 //  }
 
 
-#define FUZZING_ENABLED
+#ifdef BDE_ACTIVATE_FUZZ_TESTING
 
-#ifdef FUZZING_ENABLED
+#define BSLS_PRE_DONE_ENABLED
 
 #include <bsls_assert.h>
 #include <bsls_pointercastutil.h>
